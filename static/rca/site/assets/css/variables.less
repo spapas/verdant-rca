@@ -42,9 +42,9 @@
 * @font-family-[your variant name]
 */
 
-@font-family-benton: "Benton Sans Medium", "Helvetica Neue", Arial, Helvetica, Sans-Serif;
-@font-family-benton-light: "Benton Sans Light", "Helvetica Neue", Arial, Helvetica, Sans-Serif;
-@font-family-knockout: 'Knockout 68 A', 'Knockout 68 B', "Helvetica Neue", Arial, Helvetica, Sans-Serif;
+@font-family-benton: "Benton Sans Medium", "BentonSans-Medium", "Helvetica Neue", Arial, Helvetica, Sans-Serif;
+@font-family-benton-light: "Benton Sans Light", "BentonSans-Light", "Helvetica Neue", Arial, Helvetica, Sans-Serif;
+@font-family-knockout: 'Knockout 68 A', 'Knockout 68 B', "Knockout-68FullFeatherwt", "Helvetica Neue", Arial, Helvetica, Sans-Serif;
 @font-weight-knockout: 400;
 
 
@@ -98,11 +98,11 @@
 
 
 /* spacing - naming based on rough equivalent in ems */
-@spacing-half:         8px;
-@spacing-one:          16px;
-@spacing-onepointfive: 24px;
-@spacing-two:          32px;
-@spacing-three:        48px;
+@spacing-half:         @grid-gutter-width/2;
+@spacing-one:          @grid-gutter-width;
+@spacing-onepointfive: @grid-gutter-width * 1.5;
+@spacing-two:          @grid-gutter-width * 2;
+@spacing-three:        @grid-gutter-width * 3;
 
 /**
  * $Media query sizes
@@ -156,4 +156,6 @@
 @carousel-control-height:136px;
 @carousel-control-width-mobile: 87px; /* 20 px added to right and 30px added to left of arrow (reverse for the previous button) */
 @carousel-control-height-mobile: 70px;
+@carousel-image-height: 500px;
 @share-link-height: 48px;
+

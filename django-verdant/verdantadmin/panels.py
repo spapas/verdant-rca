@@ -6,6 +6,8 @@ from django.forms.models import inlineformset_factory
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
+from django.contrib.contenttypes.models import ContentType
+
 
 class BaseAdminPanel(object):
     def __init__(self, *args, **kwargs):
@@ -20,6 +22,11 @@ class BaseAdminPanel(object):
 
     def post_save(self):
         pass
+
+    @classmethod
+    def widgets(cls):
+        """return a dict of field widgets that should be overridden in the form"""
+        return {}
 
     def render(self):
         return ""
@@ -55,6 +62,45 @@ class BaseRichTextFieldPanel(BaseFieldPanel):
 
 def RichTextFieldPanel(field_name):
     return type('_FieldPanel', (BaseRichTextFieldPanel,), {'field_name': field_name})
+
+
+class BasePageChooserPanel(BaseFieldPanel):
+    template = "verdantadmin/panels/page_chooser_panel.html"
+
+    @classmethod
+    def widgets(cls):
+        return {
+            cls.field_name: HiddenInput
+        }
+
+    def render(self):
+        return mark_safe(render_to_string(self.template, {
+            'field': self.form[self.field_name],
+            'page': getattr(self.model_instance, self.field_name)
+        }))
+
+    def render_js(self):
+        page = getattr(self.model_instance, self.field_name)
+        parent = page.get_parent() if page else None
+
+        return "createPageChooser(fixPrefix('%s'), '%s/%s', %s);" % (
+            self.form[self.field_name].id_for_label,
+            self.content_type.app_label,
+            self.content_type.model,
+            (parent.id if parent else 'null'),
+        )
+
+def PageChooserPanel(field_name, page_type=None):
+    if page_type:
+        content_type = ContentType.objects.get_for_model(page_type)
+    else:
+        # TODO: infer the content type by introspection on the foreign key
+        content_type = ContentType.objects.get_by_natural_key('core', 'page')
+
+    return type('_PageChooserPanel', (BasePageChooserPanel,), {
+        'field_name': field_name,
+        'content_type': content_type,
+    })
 
 
 # Abstract superclass of InlinePanel types. Subclasses need to provide:
@@ -120,22 +166,25 @@ class BaseInlinePanel(BaseAdminPanel):
             admin._post_save()
 
 def InlinePanel(base_model, related_model, panels=None, label=None):
-    formset_class = inlineformset_factory(base_model, related_model, extra=0)
+
+    # construct an admin handler for the child model class
     admin_handler_panels = panels
-
-    if not label:
-        # derive a label from the related_name
-        label = formset_class.fk.rel.related_name.replace('_', ' ').capitalize()
-
-    # construct an AdminHandler class around the particular flavour of ModelForm
-    # that inlineformset_factory generates
     from verdantadmin.forms import AdminHandler
     class InlineAdminHandler(AdminHandler):
-        form = formset_class.form
+        model = related_model
         can_delete = True
 
         if admin_handler_panels is not None:
             panels = admin_handler_panels
+
+    # now construct a formset, ensuring that it uses the specific form class
+    # built for the adminhandler above (because it might use panels that override
+    # the default form widgets)
+    formset_class = inlineformset_factory(base_model, related_model, form=InlineAdminHandler.form, extra=0)
+
+    if not label:
+        # derive a label from the related_name
+        label = formset_class.fk.rel.related_name.replace('_', ' ').capitalize()
 
     # return a newly constructed subclass of BaseInlinePanel with the addition of
     # a self.formset_class and self.admin_handler attribute

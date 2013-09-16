@@ -3,6 +3,11 @@
 {% load image_tags %}
 
 {% block pre_content %}
+    {% if self.author %}
+        {% image self.author.mugshot 64x64 %}
+        <p>By <a href="{{ self.author.url }}">{{ self.author.title }}</a></p>
+    {% endif %}
+
     {% image self.lead_image 400x300 %}
 {% endblock %}
 
@@ -12,7 +17,12 @@
             <h2>Related links</h2>
             <ul>
                 {% for link in related_links %}
-                    <li><a href="{{ link.url }}">{{ link.link_text }}</a></li>
+                    <li>
+                        <a href="{{ link.url }}">
+                            {% image link.image 64x64 %}
+                            {{ link.link_text }}
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}

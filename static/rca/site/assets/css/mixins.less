@@ -43,6 +43,26 @@
     }*/
 }
 
+.visuallyhidden() {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+
+    &:active, &:focus { 
+        clip: auto; 
+        height: auto; 
+        margin: 0; 
+        overflow: visible; 
+        position: static; 
+        width: auto; 
+    }
+}
+
 
 /** 
 * Clearfix
@@ -73,9 +93,6 @@
         margin-bottom:0;
         padding-left:0;
     }
-    li{
-
-    }
     li:before{
         content:none;
         margin:auto;
@@ -90,6 +107,7 @@
 
 /* sidebar advert */
 .mixin-sidebar-advert(@color, @fade:0) {
+    .transition(background-color 0.3s ease);
     background-color: @color; /* fallback for ie8 */
     background-color: fade(@color, @fade);
     color:white;
@@ -108,7 +126,7 @@
     }
     a {
         display: block;
-        padding: @spacing-half @spacing-one @spacing-two @spacing-half;
+        padding: @spacing-half @spacing-one @spacing-one @spacing-half;
         &:hover, &:focus {
             color: @color-white;
         }
@@ -118,7 +136,7 @@
 .module{
     border-top:1px solid @color-divider;
     padding-top: @spacing-half;
-    margin-top: @spacing-two;
+    margin-top: @spacing-one;
 
     .module-title{
         margin-top:0;
@@ -135,20 +153,26 @@
 }
 
 /* generic styles for two-plus, three-plus etc */
-.x-plus-mobile {
+.x-plus-scrolled() {
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+
     ul{
         .unlist();
         .row-flush();
         position:relative;
-
-        li{
-            .column(8);         
-        }
-        .h8, .bc5, .a3{
-            margin:0;
-        }
-
+        white-space: nowrap;
     }
+    li{
+        .column(8); 
+        display:inline-block;
+        white-space:normal;
+        float:none;
+    }
+    .h8, .bc5, .a3{
+        margin:0;
+    }
+
     .image{
         margin-bottom:@grid-gutter-width/2;
         img{
@@ -157,9 +181,27 @@
     }
 
     .load-more{
+        display:none;
         a{
             height:126px;
             width:126px;
         }
+    }
+    .h8, .bc5 {
+        font-size: @font-size-14;
+    }
+}
+
+/* name - span makes a new line - used by staff profile, event */
+.name {
+    color: @color-charcoal;
+    line-height: @line-height-13;
+    margin-top: @spacing-half;
+    span {
+        display: block;
+        clear: both;
+    }
+    &:hover {
+        color: @color-highlight-blue;
     }
 }
