@@ -7,28 +7,79 @@ $(function(){
     var $right = $(".wrapper-right");
     var scrollY;
 
-    $(".search input").toggleClick(function(){
+    // $left.css("border", "1px solid black");
+    // $right.css("border", "1px solid red");
+
+    var headerFullHeight = $(".header-wrapper").height();
+
+    $left.find(".two-plus a").click(function(){
         var leftOffset = $left.offset();
         var leftMarginTop = pixelToNumber($left.css("margin-top"));
         var leftWidht = $left.width();
+        var leftHeight = $left.height();
         scrollY = window.scrollY;
 
-        $right.addClass("wrapper-right-before-slide-right");
-        $slider.addClass("slider-animate-slide-right", 1000, function(){
-            $left.addClass("wrapper-left-after-slide-right");
-            $left.css({
-                top: - scrollY + leftOffset.top - leftMarginTop,
-                left: -leftWidht,
-                width: leftWidht
+        $slider.css({
+            height: leftHeight
+        });
+
+        $left.css({
+            position: "fixed",
+            top: - scrollY + leftOffset.top - leftMarginTop,
+            left: leftOffset.left,
+            width: leftWidht
+        });
+
+        $left.animate({
+            left: -leftWidht,
+            marginLeft: "2.5%"
+        }, 1000);
+
+        $right.css({
+            position: "fixed",
+            top: headerFullHeight,
+            width: leftWidht
+        });
+        $right.animate({
+            left: 0,
+            marginLeft: "5%"
+        }, 1000, function(){
+            $right.css({
+                position: "static",
+                width: "90%"
             });
         });
 
-    }, function(){
-        $left.removeClass("wrapper-left-after-slide-right");
-        $left.attr("style", "");
-        $slider.removeClass("slider-animate-slide-right", 1000, function(){
-            $right.removeClass("wrapper-right-before-slide-right");
+    });
+
+    $right.find(".two-plus a").click(function(){
+        var offset = $right.offset();
+        var marginTop = pixelToNumber($right.css("margin-top"));
+        var width = $right.width();
+
+        $left.animate({
+            left: 0,
+            marginLeft: "5%"
+        }, 1000, function(){
+            $left.css({
+                position: "static"
+            });
             $(window).scrollTop(scrollY);
+        });
+
+
+        $right.css({
+            position: "fixed",
+            top: -window.scrollY + offset.top - marginTop,
+            width: width,
+            marginLeft: "10%"
+        });
+        $right.animate({
+            left: width
+        }, 1000, function(){
+            $left.css({
+                width: "90%"
+            });
         });
 
     });
