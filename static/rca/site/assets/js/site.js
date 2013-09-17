@@ -64,6 +64,7 @@ $(function(){
     showHideSlide('.related h2', '.related', '.related .wrapper');
     showHide('.showmenu', 'nav');
     showHide('.showsearch', 'form.search');
+    showHide('.filters .checkbox .label', '.filters .checkbox .checkboxes');
     showHideDialogue();
 
     /* start any bxslider carousels not found within a tab  */
@@ -161,4 +162,6 @@ $(function(){
             return false;
         });
     });
+
+  
 });
