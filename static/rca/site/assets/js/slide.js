@@ -35,6 +35,8 @@ $(function(){
     var headerFullHeight = $(".header-wrapper").height();
     var headerCompactHeight = 34;
 
+    $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
+
     $left.find(".two-plus a").click(function(){
         var leftAffix = $left.data('bs.affix');
         var rightAffix = $right.data('bs.affix');
@@ -105,7 +107,9 @@ $(function(){
 
     });
 
-    $right.find(".two-plus a").click(function(){
+    $right.on("click", "a", function(){
+        window.history.pushState(null, "", "programme.html");
+
         var leftAffix = $left.data('bs.affix');
         var rightAffix = $right.data('bs.affix');
         var headerAffix = $header.data('bs.affix');
@@ -157,6 +161,6 @@ $(function(){
                 headerAffix.enable();
             }
         }
-
+        return false;
     });
 });

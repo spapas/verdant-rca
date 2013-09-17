@@ -38,7 +38,7 @@
         </div>
 
         <div class="slider">
-            <div class="page-wrapper wrapper-left" data-spy="affix" data-offset-top="151">
+            <div class="page-wrapper wrapper-left" data-spy="affix" data-offset-top="151" id="pjax">
                 <div class="page-content">
                     <div class="inner">
                         {{ content }}
@@ -49,20 +49,13 @@
                 </aside>
             </div>
             <div class="page-wrapper wrapper-right" data-spy="affix" data-offset-top="151">
-                <div class="page-content">
-                    <div class="inner">
-                        {% include modules/two-plus.html %}
-                    </div>
-                </div>
-                <aside>
-                    {% include sidebar.html %}
-                </aside>
             </div>
         </div>
 
         {% include footer.html %}
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="assets/js/vendor/jquery.pjax.js"></script>
         <script src="assets/js/vendor/imagesloaded.pkgd.min.js"></script>
         <script src="assets/js/vendor/packery.pkgd.min.js"></script>
         <script src="assets/js/vendor/harvey.js"></script>
