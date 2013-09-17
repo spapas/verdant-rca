@@ -69,7 +69,7 @@ $(function(){
         $right.removeClass(headerAffix.constructor.RESET);
 
         $left.animate({
-            left: -leftWidht/2
+            left: -leftWidht
         }, 1000, function(){
             leftFinished = true;
             checkBothAnimationsFinished();
@@ -102,6 +102,9 @@ $(function(){
         function checkBothAnimationsFinished(){
             if(leftFinished && rightFinished){
                 headerAffix.enable();
+                $slider.css({
+                    height: "auto"
+                });
             }
         }
 
@@ -121,6 +124,12 @@ $(function(){
 
         headerAffix.disable();
         $header.removeClass(headerAffix.constructor.RESET).addClass("affix");
+
+        // if the browser has been resized we need to adjust fix positioned elements
+        $left.width($right.width());
+        $slider.css({
+            height: $left.height()
+        });
 
         $left.animate({
             left: 0,
@@ -146,7 +155,7 @@ $(function(){
         });
 
         $right.animate({
-            left: width
+            left: width + (2 * offset.left)
         }, 1000, function(){
             $left.css({
                 width: "90%"
@@ -159,6 +168,9 @@ $(function(){
         function checkBothAnimationsFinished(){
             if(leftFinished && rightFinished){
                 headerAffix.enable();
+                $slider.css({
+                    height: "auto"
+                });
             }
         }
         return false;
