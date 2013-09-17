@@ -49,9 +49,9 @@ $(function(){
         var leftFinished, rightFinished;
         scrollY = window.scrollY;
 
-        $slider.css({
-            height: leftHeight
-        });
+        $slider.animate({
+            height: Math.max($left.outerHeight(true), $right.outerHeight(true))
+        }, 1000);
 
         $left.css({
             position: "fixed",
@@ -68,9 +68,10 @@ $(function(){
         rightAffix.disable();
         $right.removeClass(headerAffix.constructor.RESET);
 
-        $left.animate({
+        $left.transition({
             left: -leftWidht
         }, 1000, function(){
+            $slider.stop(); // stop animating the height, it's not visible now
             leftFinished = true;
             checkBothAnimationsFinished();
         });
@@ -84,7 +85,7 @@ $(function(){
         headerAffix.disable();
         $header.removeClass(headerAffix.constructor.RESET).addClass("affix");
 
-        $right.animate({
+        $right.transition({
             left: 0,
             marginLeft: "5%"
         }, 1000, function(){
@@ -128,10 +129,10 @@ $(function(){
         // if the browser has been resized we need to adjust fix positioned elements
         $left.width($right.width());
         $slider.css({
-            height: $left.height()
+            height: Math.max($left.outerHeight(true), $right.outerHeight(true))
         });
 
-        $left.animate({
+        $left.transition({
             left: 0,
             marginLeft: "5%"
         }, 1000, function(){
@@ -154,7 +155,7 @@ $(function(){
             marginLeft: 0
         });
 
-        $right.animate({
+        $right.transition({
             left: width + (2 * offset.left)
         }, 1000, function(){
             $left.css({
