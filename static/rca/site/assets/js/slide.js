@@ -69,7 +69,7 @@ $(function(){
         $right.removeClass(headerAffix.constructor.RESET);
 
         $left.transition({
-            left: -leftWidht
+            left: "-100%"
         }, 1000, function(){
             $slider.stop(); // stop animating the height, it's not visible now
             leftFinished = true;
@@ -156,7 +156,7 @@ $(function(){
         });
 
         $right.transition({
-            left: width + (2 * offset.left)
+            left: "100%"
         }, 1000, function(){
             $left.css({
                 width: "90%"
@@ -176,4 +176,5 @@ $(function(){
         }
         return false;
     });
+
 });
