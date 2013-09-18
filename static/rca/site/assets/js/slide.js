@@ -23,157 +23,115 @@ $(function(){
     function pixelToNumber(val){
         return parseInt(("" + val).replace(/[\-px]+/g, ""), 10);
     }
-    var $slider = $(".slider");
-    var $left = $(".wrapper-left");
-    var $right = $(".wrapper-right");
-    var $header = $(".header-wrapper");
+    $left = $(".wrapper-left");
+    $right = $(".wrapper-right");
+    $header = $(".header-wrapper");
     var scrollY;
-
-    // TODO: if content is not fully loaded the container might need to be taller
-    // TODO: positioning if menu is not collapsed on the main page
 
     var headerFullHeight = $(".header-wrapper").height();
     var headerCompactHeight = 34;
 
     $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
 
-    $left.find(".two-plus a").click(function(){
-        var leftAffix = $left.data('bs.affix');
-        var rightAffix = $right.data('bs.affix');
-        var headerAffix = $header.data('bs.affix');
-
-        var leftOffset = $left.offset();
-        var leftMarginTop = pixelToNumber($left.css("margin-top"));
-        var leftWidht = $left.width();
-        var leftHeight = $left.height();
-        var leftFinished, rightFinished;
-        scrollY = window.scrollY;
-
-        $slider.animate({
-            height: Math.max($left.outerHeight(true), $right.outerHeight(true))
-        }, 1000);
+    function slideRight(){
+        var scrollY = window.scrollY;
+        scrollYLeft = scrollY;
+        $left.wrap('<div class="slider"/>').parent().append($right);
+        $slider = $(".slider");
 
         $left.css({
-            position: "fixed",
-            top: - scrollY + leftOffset.top - leftMarginTop,
-            left: leftOffset.left,
-            width: leftWidht,
-            marginLeft: 0
+            width: $left.width(),
+            float: "left"
         });
-
-        // make the top nav menu compact by scrolling down
-        // $(window).scrollTop(1 + pixelToNumber($left.data("offset-top")));
-
-        leftAffix.disable();
-        rightAffix.disable();
-        $right.removeClass(headerAffix.constructor.RESET);
-
-        $left.transition({
-            left: "-100%"
-        }, 1000, function(){
-            $slider.stop(); // stop animating the height, it's not visible now
-            leftFinished = true;
-            checkBothAnimationsFinished();
-        });
-
         $right.css({
-            position: "fixed",
-            top: leftOffset + leftMarginTop,
-            width: leftWidht
+            position: "static",
+            width: $left.width()
         });
-
-        headerAffix.disable();
-        $header.removeClass(headerAffix.constructor.RESET).addClass("affix");
-
-        $right.transition({
-            left: 0,
-            marginLeft: "5%"
+        $("body").css({
+            overflowX: "hidden"
+        });
+        $slider.css({
+            width: "200%"
+        });
+        $right.css({
+            paddingTop: scrollY
+        });
+        $slider.animate({
+            marginLeft: "-100%"
         }, 1000, function(){
             $right.css({
-                position: "static",
+                paddingTop: 0
+            });
+            $(window).scrollTop(0);
+            $left.css({
+                position: "fixed",
+                left: "-100%",
+                top: scrollY,
                 width: "90%"
             });
-            // $(window).scrollTop($left.data("offset-top"));
-            rightAffix.enable();
-            rightFinished = true;
-            checkBothAnimationsFinished();
+            $right.css({
+                width: "auto"
+            });
+            $("body").css({
+                overflowX: "auto"
+            });
+            $left.unwrap();
+        });
+    }
+
+    function slideLeft(){
+        var rightOffset = $right.offset();
+        $left.wrap('<div class="slider"/>').parent().append($right);
+        $slider = $(".slider");
+
+        $left.css({
+            width: $right.width(),
+            float: "left",
+            position: "static"
+        });
+        $right.css({
+            width: $right.width(),
+            position: "relative",
+            top: -scrollYLeft,
+            left:0
+        });
+        $(window).scrollTop(scrollYLeft);
+        $("body").css({
+            overflowX: "hidden"
+        });
+        $slider.css({
+            marginLeft: "-100%",
+            width: "200%"
         });
 
+        $slider.animate({
+            marginLeft: "0"
+        }, 1000, function(){
+            $right.css({
+                position: "fixed",
+                left: "100%",
+                width: "90%",
+                top: 0,
+                paddingTop:0
+            });
+            $left.css({
+                width: "auto"
+            });
+            $("body").css({
+                overflowX: "auto"
+            });
+            $left.unwrap();
+        });
+    }
 
-        function checkBothAnimationsFinished(){
-            if(leftFinished && rightFinished){
-                headerAffix.enable();
-                $slider.css({
-                    height: "auto"
-                });
-            }
-        }
-
+    $left.on("click", "a", function(){
+        slideRight();
+        return false;
     });
 
     $right.on("click", "a", function(){
-        window.history.pushState(null, "", "programme.html");
-
-        var leftAffix = $left.data('bs.affix');
-        var rightAffix = $right.data('bs.affix');
-        var headerAffix = $header.data('bs.affix');
-
-        var offset = $right.offset();
-        var marginTop = pixelToNumber($right.css("margin-top"));
-        var width = $right.width();
-        var leftFinished, rightFinished;
-
-        headerAffix.disable();
-        $header.removeClass(headerAffix.constructor.RESET).addClass("affix");
-
-        // if the browser has been resized we need to adjust fix positioned elements
-        $left.width($right.width());
-        $slider.css({
-            height: Math.max($left.outerHeight(true), $right.outerHeight(true))
-        });
-
-        $left.transition({
-            left: 0,
-            marginLeft: "5%"
-        }, 1000, function(){
-            $(window).scrollTop(scrollY);
-            $left.css({
-                position: "static"
-            });
-            $(window).scrollTop(scrollY);
-
-            leftAffix.enable();
-            leftFinished = true;
-            checkBothAnimationsFinished();
-        });
-
-        $right.css({
-            position: "fixed",
-            top: -window.scrollY + offset.top - marginTop,
-            left: offset.left,
-            width: width,
-            marginLeft: 0
-        });
-
-        $right.transition({
-            left: "100%"
-        }, 1000, function(){
-            $left.css({
-                width: "90%"
-            });
-            rightAffix.disable();
-            rightFinished = true;
-            checkBothAnimationsFinished();
-        });
-
-        function checkBothAnimationsFinished(){
-            if(leftFinished && rightFinished){
-                headerAffix.enable();
-                $slider.css({
-                    height: "auto"
-                });
-            }
-        }
+        // window.history.pushState(null, "", "programme.html");
+        slideLeft();
         return false;
     });
 

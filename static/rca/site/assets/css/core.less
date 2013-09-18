@@ -352,16 +352,8 @@ ul ul, ol ol {
     .clearfix();
     margin-top:1em;
 }
-
-    .wrapper-left{
-        margin-left: 5%;
-        width:90%;
-    }
-
-    .wrapper-right{
-        position: fixed;
-        top: 0;
-        left: 100%;
+    .wrapper-left, .wrapper-right{
+        display: inline-block;
     }
 
 
@@ -786,7 +778,7 @@ nav.expanded {
 .related {
     .mixin-grey-links;
     margin-top: @grid-gutter-width * 10;
-    
+
     h2 {
         .transition(background-color 0.3s ease);
         position: relative;

@@ -1,1 +1,15 @@
-{{ content }}
+<div class="header-wrapper" data-spy="affix" data-offset-top="151">
+    {% include header.html %}
+</div>
+
+<div class="page-wrapper" data-spy="affix" data-offset-top="151" id="pjax">
+    <div class="page-content">
+        <div class="inner">
+            {{ content }}
+        </div>
+    </div>
+    <aside>
+        {% include sidebar.html %}
+    </aside>
+</div>
+{% include footer.html %}
