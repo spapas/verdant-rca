@@ -25,7 +25,8 @@ $(function(){
     }
     $left = $(".wrapper-left");
     $right = $(".wrapper-right");
-    $header = $(".header-wrapper");
+    $headerLeft = $(".wrapper-left .header-wrapper");
+    $headerRight = $(".wrapper-right .header-wrapper");
     var scrollY;
 
     var headerFullHeight = $(".header-wrapper").height();
@@ -40,13 +41,14 @@ $(function(){
         $slider = $(".slider");
 
         $left.css({
-            width: $left.width(),
+            width: $("body").width(),
             float: "left"
         });
         $right.css({
             position: "static",
-            width: $left.width()
+            width: $("body").width()
         });
+
         $("body").css({
             overflowX: "hidden"
         });
@@ -56,6 +58,7 @@ $(function(){
         $right.css({
             paddingTop: scrollY
         });
+
         $slider.animate({
             marginLeft: "-100%"
         }, 1000, function(){
@@ -70,7 +73,7 @@ $(function(){
                 width: "90%"
             });
             $right.css({
-                width: "auto"
+                width: "100%"
             });
             $("body").css({
                 overflowX: "auto"
@@ -85,12 +88,12 @@ $(function(){
         $slider = $(".slider");
 
         $left.css({
-            width: $right.width(),
+            width: $("body").width(),
             float: "left",
             position: "static"
         });
         $right.css({
-            width: $right.width(),
+            width: $("body").width(),
             position: "relative",
             top: -scrollYLeft,
             left:0
@@ -115,7 +118,7 @@ $(function(){
                 paddingTop:0
             });
             $left.css({
-                width: "auto"
+                width: "100%"
             });
             $("body").css({
                 overflowX: "auto"
