@@ -95,7 +95,7 @@ $(function(){
         $right.css({
             width: $("body").width(),
             position: "relative",
-            top: -scrollYLeft,
+            top: scrollYLeft - window.scrollY,
             left:0
         });
         $(window).scrollTop(scrollYLeft);
