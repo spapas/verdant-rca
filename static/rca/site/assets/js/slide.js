@@ -89,6 +89,7 @@ $(function(){
             $right.css({
                 paddingTop: 0
             });
+            $(window).scrollTop(1);
             $(window).scrollTop(0);
 
             if(!isMobileLayout && ($headerLeft.height() < 80)){
