@@ -71,8 +71,7 @@ $(function(){
             paddingTop: scrollY
         });
 
-        if(!isMobileLayout)
-        if($headerLeft.height() < 80){
+        if(!isMobileLayout && ($headerLeft.height() < 80)){
             $headerRight
             .removeClass("affix").addClass("affix-top")
             .css({
@@ -92,8 +91,7 @@ $(function(){
             });
             $(window).scrollTop(0);
 
-            if(!isMobileLayout)
-            if($headerLeft.height() < 80){
+            if(!isMobileLayout && ($headerLeft.height() < 80)){
                 $right.children(".page-wrapper").removeClass("affix").addClass("affix-top");
                 $headerRight
                     .css("position", "static")
@@ -151,6 +149,10 @@ $(function(){
             width: "200%"
         });
 
+        if(!isMobileLayout && ($headerRight.height() > 80)){
+            $right.children(".page-wrapper").addClass("no-affix");
+        }
+
         $slider[animate]({
             marginLeft: "0"
         }, 1000, function(){
@@ -168,6 +170,7 @@ $(function(){
                 overflowX: "auto"
             });
             $left.unwrap();
+            $right.children(".page-wrapper").removeClass("no-affix");
         });
 
 

@@ -106,6 +106,13 @@
     margin-top: @header-height + 35px; /* space for fixed header */
 }
 
+// Disables the affix class during sliding animations to prevent the content from jumping.
+// If the affix class is removed it gets added back on the next scroll event,
+// that's why !important is needed here. This class is removed after animation is complete.
+.no-affix{
+    margin-top: 0 !important;
+}
+
 header {
     height:auto;
     margin:auto;
