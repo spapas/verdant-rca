@@ -50,7 +50,6 @@
 }
 
 body {
-    padding: 0 15px 0 15px; /* padding for mobile */
     font-size: @font-size-base;
     font-family: @font-family-benton-light;
     -webkit-font-smoothing: antialiased; /* Do not remove! */
@@ -355,11 +354,22 @@ ul ul, ol ol {
     .wrapper-left, .wrapper-right{
         display: inline-block;
         width: 100%;
+        padding: 0 15px 0 15px; /* padding for mobile */
     }
     .slide-right {
         .transform(translateZ(0));
         .transform-style(preserve-3d);
-        .transform(translate3D(-50%, 0, 0));
+        .transform(translate3D(-100%, 0, 0));
+        .transition(-webkit-transform 1s ease-in-out);
+        .transition(   -moz-transform 1s ease-in-out);
+        .transition(    -ms-transform 1s ease-in-out);
+        .transition(     -o-transform 1s ease-in-out);
+        .transition(        transform 1s ease-in-out);
+    }
+    .slide-left {
+        .transform(translateZ(0));
+        .transform-style(preserve-3d);
+        .transform(translate3D(100%, 0, 0));
         .transition(-webkit-transform 1s ease-in-out);
         .transition(   -moz-transform 1s ease-in-out);
         .transition(    -ms-transform 1s ease-in-out);

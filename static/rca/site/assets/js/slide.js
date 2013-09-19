@@ -38,6 +38,14 @@ $(function(){
 
 
     function slideRight(){
+        var isMobileLayout = $left.css("padding-left") != "0px";
+        $('[data-spy="affix"]').each(function(){
+            if(isMobileLayout){
+                $(this).data("bs.affix").disable();
+            }else{
+                $(this).data("bs.affix").enable();
+            }
+        });
         var scrollY = window.scrollY;
         scrollYLeft = scrollY;
         $left.wrap('<div class="slider"/>').parent().append($right);
@@ -62,6 +70,7 @@ $(function(){
             paddingTop: scrollY
         });
 
+        if(!isMobileLayout)
         if($headerLeft.height() < 80){
             $headerRight
             .removeClass("affix").addClass("affix-top")
@@ -74,16 +83,20 @@ $(function(){
             .data("bs.affix").disable();
         }
 
-        // $slider.addClass("slide-right").on("webkitTransitionEnd otransitionend oTransitionEndmsTransitionEnd transitionend", function(){
-        //     alert("transitionEnd");
+        // $slider.addClass("slide-right");
+        // $slider.removeClass("slide-left");
+            //.on("webkitTransitionEnd otransitionend oTransitionEndmsTransitionEnd transitionend", function(){
+            // alert("transitionEnd");
         $slider.transition({
             marginLeft: "-100%"
         }, 1000, function(){
+        // setTimeout(function(){
             $right.css({
                 paddingTop: 0
             });
             $(window).scrollTop(0);
 
+            if(!isMobileLayout)
             if($headerLeft.height() < 80){
                 $right.children(".page-wrapper").removeClass("affix").addClass("affix-top");
                 $headerRight
@@ -105,6 +118,7 @@ $(function(){
                 overflowX: "auto"
             });
             $left.unwrap();
+        // }, 1020);
         });
 
 
@@ -117,6 +131,7 @@ $(function(){
     }
 
     function slideLeft(){
+        var isMobileLayout = $left.css("padding-left") != "0px";
         var rightOffset = $right.offset();
         $left.wrap('<div class="slider"/>').parent().append($right);
         $slider = $(".slider");
@@ -141,6 +156,11 @@ $(function(){
             width: "200%"
         });
 
+
+        // $slider.removeClass("slide-right");
+        // $slider.addClass("slide-left");
+        // setTimeout(function(){
+
         $slider.transition({
             marginLeft: "0"
         }, 1000, function(){
@@ -158,6 +178,7 @@ $(function(){
                 overflowX: "auto"
             });
             $left.unwrap();
+        // }, 1020);
         });
 
         $headerLeft.transition({
