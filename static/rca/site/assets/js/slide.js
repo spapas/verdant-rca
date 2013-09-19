@@ -36,6 +36,7 @@ $(function(){
 
     $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
 
+    var animate = $.support.transition ? "transition" : "animate";
 
     function slideRight(){
         var isMobileLayout = $left.css("padding-left") != "0px";
@@ -87,7 +88,7 @@ $(function(){
         // $slider.removeClass("slide-left");
             //.on("webkitTransitionEnd otransitionend oTransitionEndmsTransitionEnd transitionend", function(){
             // alert("transitionEnd");
-        $slider.transition({
+        $slider[animate]({
             marginLeft: "-100%"
         }, 1000, function(){
         // setTimeout(function(){
@@ -122,10 +123,10 @@ $(function(){
         });
 
 
-        $headerLeft.transition({
+        $headerLeft[animate]({
             left: "-200%"
         }, 1000, function(){});
-        $headerRight.transition({
+        $headerRight[animate]({
             left: "0"
         }, 1000, function(){});
     }
@@ -161,7 +162,7 @@ $(function(){
         // $slider.addClass("slide-left");
         // setTimeout(function(){
 
-        $slider.transition({
+        $slider[animate]({
             marginLeft: "0"
         }, 1000, function(){
             $right.css({
@@ -181,10 +182,10 @@ $(function(){
         // }, 1020);
         });
 
-        $headerLeft.transition({
+        $headerLeft[animate]({
             left: "0"
         }, 1000, function(){});
-        $headerRight.transition({
+        $headerRight[animate]({
             left: "100%"
         }, 1000, function(){});
     }
