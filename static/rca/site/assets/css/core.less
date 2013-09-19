@@ -356,6 +356,16 @@ ul ul, ol ol {
         display: inline-block;
         width: 100%;
     }
+    .slide-right {
+        .transform(translateZ(0));
+        .transform-style(preserve-3d);
+        .transform(translate3D(-50%, 0, 0));
+        .transition(-webkit-transform 1s ease-in-out);
+        .transition(   -moz-transform 1s ease-in-out);
+        .transition(    -ms-transform 1s ease-in-out);
+        .transition(     -o-transform 1s ease-in-out);
+        .transition(        transform 1s ease-in-out);
+    }
 
 
 .page-content {

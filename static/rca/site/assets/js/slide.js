@@ -3,7 +3,8 @@
     $("iframe").remove();
 }, 200);
 
-$(window).on("load", function(){
+// $(window).on("load", function(){
+$(function(){
     var Affix = $('[data-spy="affix"]').eq(0).data('bs.affix').constructor;
     Affix.prototype.disable = function(){
         if(this.$element.length){
@@ -25,6 +26,7 @@ $(function(){
     }
     $left = $(".wrapper-left");
     $right = $(".wrapper-right");
+    $header = $(".header-wrapper");
     $headerLeft = $(".wrapper-left .header-wrapper");
     $headerRight = $(".wrapper-right .header-wrapper");
     var scrollY;
@@ -33,6 +35,7 @@ $(function(){
     var headerCompactHeight = 34;
 
     $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
+
 
     function slideRight(){
         var scrollY = window.scrollY;
@@ -59,13 +62,36 @@ $(function(){
             paddingTop: scrollY
         });
 
-        $slider.animate({
+        if($headerLeft.height() < 80){
+            $headerRight
+            .removeClass("affix").addClass("affix-top")
+            .css({
+                left:"100%",
+                top: 0,
+                position: "fixed",
+                marginLeft: "5%"
+            })
+            .data("bs.affix").disable();
+        }
+
+        // $slider.addClass("slide-right").on("webkitTransitionEnd otransitionend oTransitionEndmsTransitionEnd transitionend", function(){
+        //     alert("transitionEnd");
+        $slider.transition({
             marginLeft: "-100%"
         }, 1000, function(){
             $right.css({
                 paddingTop: 0
             });
             $(window).scrollTop(0);
+
+            if($headerLeft.height() < 80){
+                $right.children(".page-wrapper").removeClass("affix").addClass("affix-top");
+                $headerRight
+                    .css("position", "static")
+                    .data("bs.affix").enable();
+                $headerRight.attr("style", "");
+            }
+
             $left.css({
                 position: "fixed",
                 left: "-100%",
@@ -80,6 +106,14 @@ $(function(){
             });
             $left.unwrap();
         });
+
+
+        $headerLeft.transition({
+            left: "-200%"
+        }, 1000, function(){});
+        $headerRight.transition({
+            left: "0"
+        }, 1000, function(){});
     }
 
     function slideLeft(){
@@ -107,13 +141,13 @@ $(function(){
             width: "200%"
         });
 
-        $slider.animate({
+        $slider.transition({
             marginLeft: "0"
         }, 1000, function(){
             $right.css({
                 position: "fixed",
                 left: "100%",
-                width: "90%",
+                width: "100%",
                 top: 0,
                 paddingTop:0
             });
@@ -125,6 +159,13 @@ $(function(){
             });
             $left.unwrap();
         });
+
+        $headerLeft.transition({
+            left: "0"
+        }, 1000, function(){});
+        $headerRight.transition({
+            left: "100%"
+        }, 1000, function(){});
     }
 
     $left.on("click", "a", function(){
