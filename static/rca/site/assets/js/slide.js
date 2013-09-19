@@ -1,7 +1,6 @@
-
-;setInterval(function(){
-    $("iframe").remove();
-}, 200);
+// ;setInterval(function(){
+//     $("iframe").remove();
+// }, 500);
 
 // $(window).on("load", function(){
 $(function(){
@@ -33,8 +32,6 @@ $(function(){
 
     var headerFullHeight = $(".header-wrapper").height();
     var headerCompactHeight = 34;
-
-    $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
 
     var animate = $.support.transition ? "transition" : "animate";
 
@@ -189,6 +186,8 @@ $(function(){
         slideRight();
         return false;
     });
+
+    // $(document).pjax('.wrapper-left a[data-pjax]', '.wrapper-right');
 
     $right.on("click", "a", function(){
         // window.history.pushState(null, "", "programme.html");
