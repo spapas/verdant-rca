@@ -1,4 +1,5 @@
 from django.core.files import File
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -11,16 +12,18 @@ import os.path
 
 from taggit.managers import TaggableManager
 
+from verdantadmin.taggable import TagSearchable
 from verdantimages import image_ops
 
 
-class Image(models.Model):
+class AbstractImage(models.Model, TagSearchable):
     title = models.CharField(max_length=255)
     file = models.ImageField(upload_to='original_images', width_field='width', height_field='height')
     width = models.IntegerField(editable=False)
     height = models.IntegerField(editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    tags = TaggableManager(help_text=None)
+    tags = TaggableManager(help_text=None, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -33,20 +36,55 @@ class Image(models.Model):
 
         try:
             rendition = self.renditions.get(filter=filter)
-        except Rendition.DoesNotExist:
+        except ObjectDoesNotExist:
             file_field = self.file
             generated_image_file = filter.process_image(file_field.file)
 
-            rendition = Rendition.objects.create(
-                image=self, filter=filter, file=generated_image_file)
+            rendition, created = self.renditions.get_or_create(
+                filter=filter, defaults={'file': generated_image_file})
 
         return rendition
+
+    def is_portrait(self):
+        return (self.width < self.height)
+    def is_landscape(self):
+        return (self.height < self.width)
+
+    @property
+    def default_alt_text(self):
+        # by default the alt text field (used in rich text insertion) is populated
+        # from the title. Subclasses might provide a separate alt field, and
+        # override this
+        return self.title
+
+    class Meta:
+        abstract=True
+
+class Image(AbstractImage):
+    pass
 
 # Receive the pre_delete signal and delete the file associated with the model instance.
 @receiver(pre_delete, sender=Image)
 def image_delete(sender, instance, **kwargs):
     # Pass false so FileField doesn't save the model.
     instance.file.delete(False)
+
+
+def get_image_model():
+    from django.conf import settings
+    from django.db.models import get_model
+
+    try:
+        app_label, model_name = settings.VERDANTIMAGES_IMAGE_MODEL.split('.')
+    except AttributeError:
+        return Image
+    except ValueError:
+        raise ImproperlyConfigured("VERDANTIMAGES_IMAGE_MODEL must be of the form 'app_label.model_name'")
+
+    image_model = get_model(app_label, model_name)
+    if image_model is None:
+        raise ImproperlyConfigured("VERDANTIMAGES_IMAGE_MODEL refers to model '%s' that has not been installed" % settings.VERDANTIMAGES_IMAGE_MODEL)
+    return image_model
 
 
 class Filter(models.Model):
@@ -117,9 +155,8 @@ class Filter(models.Model):
         return output_file
 
 
-class Rendition(models.Model):
-    image = models.ForeignKey('Image', related_name='renditions')
-    filter = models.ForeignKey('Filter', related_name='renditions')
+class AbstractRendition(models.Model):
+    filter = models.ForeignKey('Filter', related_name='+')
     file = models.ImageField(upload_to='images', width_field='width', height_field='height')
     width = models.IntegerField(editable=False)
     height = models.IntegerField(editable=False)
@@ -131,6 +168,18 @@ class Rendition(models.Model):
     def img_tag(self):
         return mark_safe(
             '<img src="%s" width="%d" height="%d" alt="%s">' % (escape(self.url), self.width, self.height, escape(self.image.title))
+        )
+
+    class Meta:
+        abstract=True
+
+
+class Rendition(AbstractRendition):
+    image = models.ForeignKey('Image', related_name='renditions')
+
+    class Meta:
+        unique_together = (
+            ('image', 'filter'),
         )
 
 # Receive the pre_delete signal and delete the file associated with the model instance.

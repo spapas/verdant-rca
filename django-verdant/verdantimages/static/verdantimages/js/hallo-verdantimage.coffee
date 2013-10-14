@@ -23,19 +23,20 @@
 
             button.on "click", (event) ->
                 lastSelection = widget.options.editable.getSelection()
+                insertionPoint = $(lastSelection.endContainer).parentsUntil('.richtext').last()
                 ModalWorkflow
                     url: '/admin/images/chooser/?select_format=true' # TODO: don't hard-code this, as it may be changed in urls.py
                     responses:
                         imageChosen: (imageData) ->
-                            img = document.createElement('img')
-                            img.setAttribute('src', imageData.preview.url)
-                            img.setAttribute('width', imageData.preview.width)
-                            img.setAttribute('height', imageData.preview.height)
-                            img.setAttribute('alt', imageData.alt)
-                            img.setAttribute('data-id', imageData.id)
-                            img.setAttribute('data-format', imageData.format)
-                            lastSelection.deleteContents()
-                            lastSelection.insertNode(img)
+                            elem = $(imageData.html).get(0)
+                            if insertionPoint.length
+                                # we were inside an element, so insert before it
+                                insertionPoint.before(elem)
+                            else
+                                lastSelection.insertNode(elem)
+
+                            if elem.getAttribute('contenteditable') == 'false'
+                                insertRichTextDeleteControl(elem)
                             widget.options.editable.element.trigger('change')
 
 )(jQuery)

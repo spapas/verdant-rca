@@ -53,7 +53,10 @@ USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
-USE_L10N = True
+# MW 2013-09-24: L10n needs to be disabled in order to recognise formats like
+# "24 Sep 2013" in FriendlyDateField, because Python's strptime doesn't support
+# localised month names. https://code.djangoproject.com/ticket/13339
+USE_L10N = False
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
@@ -111,7 +114,15 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
+    'core.middleware.SiteMiddleware',
+
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
+
+from django.conf import global_settings
+TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
+    'django.core.context_processors.request',
+    'rca.context_processors.global_vars',
 )
 
 ROOT_URLCONF = 'verdant.urls'
@@ -129,7 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
@@ -139,6 +150,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'treebeard',
     'taggit',
+    'django_embedly',
 
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -147,6 +159,8 @@ INSTALLED_APPS = (
     'core',
     'verdantadmin',
     'verdantimages',
+    'verdantdocs',
+    'verdantsnippets',
 
     'rca',
 )
@@ -194,3 +208,8 @@ LOGGING = {
         },
     }
 }
+
+# VERDANT SETTINGS
+
+# Override the Image class used by verdantimages with a custom one
+VERDANTIMAGES_IMAGE_MODEL = 'rca.RcaImage'

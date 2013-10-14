@@ -1,0 +1,17 @@
+{% load pageurl %}
+{% if events %}
+    <div class="today expanded">
+        <h2>Events</h2>
+        <ul>
+            {% for event in events %}
+                <li>
+                    <a href="{% pageurl event %}">
+                        <h3>{{ event.start_date|date:"j F" }}</h3>
+                        <p>{{ event.title }}</p>
+                    </a>
+                    {% if event.audience %}<span>{{ event.audience }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

@@ -1,0 +1,71 @@
+.tab-nav{
+    .clearfix();
+    border:1px solid @color-grey-lighter;
+    border-width:0 0 1px 1px;
+
+    li{
+        border:1px solid @color-grey-lighter;
+        border-width:1px 1px 0px 1px;
+        text-align:center;
+    }
+    a{
+        outline:none;
+        line-height:3em;
+        text-transform:uppercase;
+        font-weight:700;
+        font-size:1.2em;
+        text-decoration:none;
+        background-color:lighten(@color-grey-light, 15%);
+        display:block;
+        padding:0 1em;
+        color:@color-grey;
+        border-top:0.3em solid lighten(@color-grey-light, 15%);;
+        border-bottom:1px solid transparent;
+
+
+        &.active{
+            background-color:white;
+            .box-shadow(none);
+            color:@color-grey-dark;
+            border-top:0.3em solid @color-grey-dark;
+            border-bottom:2px solid white;
+            margin-bottom:-1px;
+            z-index:1;
+            position:relative;
+        }
+    }
+
+    /* For cases where tab-nav should merge with header */
+    &.merged{
+        background-color:@color-header-bg;
+        margin-top:-3.5em;
+    }
+}
+.tab-content{
+    section{
+        display:none;
+        padding-top:1em;
+
+        &.active{
+            display:block;
+        }
+    }
+}
+
+.page-editor .tab-nav li{
+    .column(6);
+    padding:0;
+}
+
+@media screen and (min-width: @breakpoint-mobile){
+    .tab-nav li{
+        .column(2);
+        padding:0;
+    }
+
+    .page-editor .tab-nav li{
+        .column(2);
+        padding:0;
+        min-width:110px;
+    }
+}

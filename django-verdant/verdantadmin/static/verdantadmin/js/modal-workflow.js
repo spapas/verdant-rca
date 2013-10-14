@@ -13,7 +13,10 @@ function ModalWorkflow(opts) {
     var self = {};
     var responseCallbacks = opts.responses || {};
 
-    var container = $('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">\n    <div class="modal-dialog">\n        <div class="modal-content">\n            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n            <div class="modal-body"></div>\n        </div><!-- /.modal-content -->\n    </div><!-- /.modal-dialog -->\n</div>');
+    /* remove any previous modals before continuing (closing doesn't remove them from the dom) */
+    $('body > .modal').remove();
+
+    var container = $('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">\n    <div class="modal-dialog">\n        <div class="modal-content">\n            <button type="button" class="close icon text-replace icon-cross" data-dismiss="modal" aria-hidden="true">&times;</button>\n            <div class="modal-body"></div>\n        </div><!-- /.modal-content -->\n    </div><!-- /.modal-dialog -->\n</div>');
     $('body').append(container);
     container.modal();
 
@@ -22,6 +25,10 @@ function ModalWorkflow(opts) {
     self.loadUrl = function(url, urlParams) {
         $.get(url, urlParams, self.loadResponseText, 'text');
     };
+
+    self.postForm = function(url, formData) {
+        $.post(url, formData, self.loadResponseText, 'text');
+    }
 
     self.loadResponseText = function(responseText) {
         var response = eval('(' + responseText + ')');

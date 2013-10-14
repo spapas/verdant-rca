@@ -1,0 +1,22 @@
+{% load pageurl image_tags %}
+{% if rcanow_pages %}
+    <ul class="related-projects">
+        {% for rcanow in rcanow_pages %}
+            <li>
+                <a href="{% pageurl rcanow %}">
+                    {% if rcanow.feature_image %}
+                        <div class="image">{% image rcanow.feature_image width-400 %}</div>
+                    {% endif %}
+                    <div class="content">
+                        <h2 class="h8">{{ rcanow.title }}</h2>
+                        {% if rcanow.author %}
+                            <p class="bc5">{{ rcanow.author }}</p>
+                        {% else %}
+                            <p class="bc5"></p>{% comment %}make sure the spacing works out even without an author{% endcomment %}
+                        {% endif %}
+                    </div>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

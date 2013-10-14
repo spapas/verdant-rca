@@ -13,9 +13,16 @@ urlpatterns = patterns('verdantadmin.views',
     url(r'^pages/(\d+)/edit/$', 'pages.edit', name='verdantadmin_pages_edit'),
 
     url(r'^pages/(\d+)/add_subpage/$', 'pages.add_subpage', name='verdantadmin_pages_add_subpage'),
+    url(r'^pages/(\d+)/delete/$', 'pages.delete', name='verdantadmin_pages_delete'),
 
-    url(r'^choose-page/(\w+)/(\w+)/$', 'choose_page.browse', name='verdantadmin_choose_page'),
-    url(r'^choose-page/(\w+)/(\w+)/(\d+)/$', 'choose_page.browse', name='verdantadmin_choose_page_child'),
+    url(r'^pages/(\d+)/move/$', 'pages.move_choose_destination', name='verdantadmin_pages_move'),
+    url(r'^pages/(\d+)/move/(\d+)/$', 'pages.move_choose_destination', name='verdantadmin_pages_move_choose_destination'),
+    url(r'^pages/(\d+)/move/(\d+)/confirm/$', 'pages.move_confirm', name='verdantadmin_pages_move_confirm'),
+
+    url(r'^choose-page/$', 'choose_page.browse', name='verdantadmin_choose_page'),
+    url(r'^choose-page/(\d+)/$', 'choose_page.browse', name='verdantadmin_choose_page_child'),
+    url(r'^choose-external-link/$', 'choose_page.external_link', name='verdantadmin_choose_page_external_link'),
+    url(r'^choose-email-link/$', 'choose_page.email_link', name='verdantadmin_choose_page_email_link'),
 
     url(r'^tag-autocomplete/$', 'tags.autocomplete', name='verdantadmin_tag_autocomplete'),
 )

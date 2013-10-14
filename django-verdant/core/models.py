@@ -9,12 +9,6 @@ from treebeard.mp_tree import MP_Node
 from core.util import camelcase_to_underscore
 
 
-# We try to do database access on app startup (namely, looking up content types) -
-# which will fail if the db hasn't been initialised (e.g. when running the initial syncdb).
-# So, need to explicitly test whether the database is usable yet. (Ugh.)
-DB_IS_READY = ('django_content_type' in connection.introspection.table_names())
-
-
 class SiteManager(models.Manager):
     def get_by_natural_key(self, hostname):
         return self.get(hostname=hostname)
@@ -22,27 +16,68 @@ class SiteManager(models.Manager):
 
 class Site(models.Model):
     hostname = models.CharField(max_length=255, unique=True, db_index=True)
+    port = models.IntegerField(default=80, help_text="Set this to something other than 80 if you need a specific port number to appear in URLs (e.g. development on port 8000). Does not affect request handling (so port forwarding still works).")
     root_page = models.ForeignKey('Page', related_name='sites_rooted_here')
+    is_default_site = models.BooleanField(default=False, help_text="If true, this site will handle requests for all other hostnames that do not have a site entry of their own")
 
     def natural_key(self):
         return (self.hostname,)
 
     def __unicode__(self):
-        if self.hostname == '*':
-            return "[Default site]"
-        else:
-            return self.hostname
+        return self.hostname + ("" if self.port == 80 else (":%d" % self.port)) + (" [default]" if self.is_default_site else "")
+
+    @staticmethod
+    def find_for_request(request):
+        """Find the site object responsible for responding to this HTTP request object"""
+        hostname = request.META['HTTP_HOST'].split(':')[0]
+        try:
+            # find a Site matching this specific hostname
+            return Site.objects.get(hostname=hostname)
+        except Site.DoesNotExist:
+            # failing that, look for a catch-all Site. If that fails, let the Site.DoesNotExist propagate back to the caller
+            return Site.objects.get(is_default_site=True)
 
 
-PAGE_CONTENT_TYPES = []
+PAGE_MODEL_CLASSES = []
+_PAGE_CONTENT_TYPES = []
 def get_page_types():
-    return PAGE_CONTENT_TYPES
+    global _PAGE_CONTENT_TYPES
+    if len(_PAGE_CONTENT_TYPES) != len(PAGE_MODEL_CLASSES):
+        _PAGE_CONTENT_TYPES = [
+            ContentType.objects.get_for_model(cls) for cls in PAGE_MODEL_CLASSES
+        ]
+    return _PAGE_CONTENT_TYPES
 
+LEAF_PAGE_MODEL_CLASSES = []
+_LEAF_PAGE_CONTENT_TYPE_IDS = []
+def get_leaf_page_content_type_ids():
+    global _LEAF_PAGE_CONTENT_TYPE_IDS
+    if len(_LEAF_PAGE_CONTENT_TYPE_IDS) != len(LEAF_PAGE_MODEL_CLASSES):
+        _LEAF_PAGE_CONTENT_TYPE_IDS = [
+            ContentType.objects.get_for_model(cls).id for cls in LEAF_PAGE_MODEL_CLASSES
+        ]
+    return _LEAF_PAGE_CONTENT_TYPE_IDS
+
+NAVIGABLE_PAGE_MODEL_CLASSES = []
+_NAVIGABLE_PAGE_CONTENT_TYPE_IDS = []
+def get_navigable_page_content_type_ids():
+    global _NAVIGABLE_PAGE_CONTENT_TYPE_IDS
+    if len(_NAVIGABLE_PAGE_CONTENT_TYPE_IDS) != len(NAVIGABLE_PAGE_MODEL_CLASSES):
+        _NAVIGABLE_PAGE_CONTENT_TYPE_IDS = [
+            ContentType.objects.get_for_model(cls).id for cls in NAVIGABLE_PAGE_MODEL_CLASSES
+        ]
+    return _NAVIGABLE_PAGE_CONTENT_TYPE_IDS
 
 class PageBase(models.base.ModelBase):
     """Metaclass for Page"""
     def __init__(cls, name, bases, dct):
         super(PageBase, cls).__init__(name, bases, dct)
+
+        if cls._deferred:
+            # this is an internal class built for Django's deferred-attribute mechanism;
+            # don't proceed with all this page type registration stuff
+            return
+
         if 'template' not in dct:
             # Define a default template path derived from the app name and model name
             cls.template = "%s/%s.html" % (cls._meta.app_label, camelcase_to_underscore(name))
@@ -53,9 +88,13 @@ class PageBase(models.base.ModelBase):
             # subclasses are only abstract if the subclass itself defines itself so
             cls.is_abstract = False
 
-        if DB_IS_READY and not cls.is_abstract:
+        if not cls.is_abstract:
             # register this type in the list of page content types
-            PAGE_CONTENT_TYPES.append(ContentType.objects.get_for_model(cls))
+            PAGE_MODEL_CLASSES.append(cls)
+        if cls.subpage_types:
+            NAVIGABLE_PAGE_MODEL_CLASSES.append(cls)
+        else:
+            LEAF_PAGE_MODEL_CLASSES.append(cls)
 
 
 class Page(MP_Node):
@@ -69,7 +108,8 @@ class Page(MP_Node):
 
     def __init__(self, *args, **kwargs):
         super(Page, self).__init__(*args, **kwargs)
-        if not self.content_type_id:
+        if not self.id and not self.content_type_id:
+            # this model is being newly created rather than retrieved from the db;
             # set content type to correctly represent the model class that this was
             # created as
             self.content_type = ContentType.objects.get_for_model(self)
@@ -126,37 +166,79 @@ class Page(MP_Node):
     def is_navigable(self):
         """
         Return true if it's meaningful to browse subpages of this page -
-        i.e. it currently has subpages, or its page type indicates that sub-pages are supported
+        i.e. it currently has subpages, or its page type indicates that sub-pages are supported,
+        or it's at the top level (this rule necessary for empty out-of-the-box sites to have working navigation)
         """
-        return (not self.is_leaf()) or self.content_type.model_class().subpage_types
+        return (not self.is_leaf()) or (self.content_type_id not in get_leaf_page_content_type_ids()) or self.depth == 2
 
-    def get_navigable_children(self):
-        # TODO: reframe this as a 'get children with a child_count greater than 0 or a content type in this list' query,
-        # which ought to be more efficient than filtering the full list of children
-        return [page for page in self.get_children() if page.is_navigable()]
-
+    def get_other_siblings(self):
+        # get sibling pages excluding self
+        return self.get_siblings().exclude(id=self.id)
 
     @property
     def url(self):
+        if not hasattr(self, '_url_base'):
+            self._set_url_properties()
+        if self._url_base:
+            return self._url_base + self._url_path
+
+    def relative_url(self, current_site):
+        if not hasattr(self, '_url_base'):
+            self._set_url_properties()
+        if self._url_site_id == current_site.id:
+            # don't prepend the full _url_base, just add a slash
+            return '/' + self._url_path
+        else:
+            return self._url_base + self._url_path
+
+    def _set_url_properties(self):
+        # populate a bunch of properties necessary for forming relative URLs:
+        # _url_path - the path portion of the url (without the initial '/')
+        # _url_site_id - the site
+        # _url_base - the http://example.com:8000/ portion of the url
+
+        # get a list of all ancestor paths of this page
         paths = [
             self.path[0:pos]
             for pos in range(0, len(self.path) + self.steplen, self.steplen)[1:]
         ]
-        ancestors = Page.objects.filter(path__in=paths).order_by('-depth').prefetch_related('sites_rooted_here')
-        path_components = []
+        # retrieve the pages with those paths, along with any site records that they
+        # are roots of. We don't worry about the join returning multiple results because
+        # 1) we're going to stop at the first row where we see a site, and 2) people really
+        # shouldn't be rooting sites at the same place anyway.
+        pages = Page.objects.raw("""
+            SELECT
+                core_page.id, core_page.slug,
+                core_site.id AS site_id, core_site.hostname, core_site.port
+            FROM
+                core_page
+                LEFT JOIN core_site ON (core_page.id = core_site.root_page_id)
+            WHERE
+                core_page.path IN %s
+            ORDER BY
+                core_page.depth DESC
+        """, [tuple(paths)])
 
-        site = None
-        for ancestor in ancestors:
-            sites_rooted_here = ancestor.sites_rooted_here.all()
-            if sites_rooted_here:
-                site = sites_rooted_here[0]
-                break
+        url = ''
+        for page in pages:
+            if page.site_id:
+                # we've found a site root
+                self._url_site_id = page.site_id
+                self._url_path = url
+                if page.port == 80:
+                    self._url_base = "http://%s/" % page.hostname
+                else:
+                    self._url_base = "http://%s:%d/" % (page.hostname, page.port)
+                return
             else:
-                path_components.insert(0, ancestor.slug)
+                # attach the parent's slug and move on to the next level up
+                url = page.slug + '/' + url
 
-        # FIXME: support cross-domain links
-        return '/' + '/'.join(path_components) + '/'
-
+        # if we got here, we've reached the end of the ancestor list without finding a site,
+        # which means that this page doesn't have a routeable URL
+        self._url_site_id = None
+        self._url_path = None
+        self._url_base = None
 
     @classmethod
     def clean_subpage_types(cls):
@@ -202,3 +284,65 @@ class Page(MP_Node):
             Returns the list of pages that this page type can be a subpage of
         """
         return Page.objects.filter(content_type__in=cls.allowed_parent_page_types())
+
+
+def get_navigation_menu_items():
+    # Get all pages that appear in the navigation menu: ones which have children,
+    # or are a non-leaf type (indicating that they *could* have children),
+    # or are at the top-level (this rule required so that an empty site out-of-the-box has a working menu)
+    navigable_content_type_ids = get_navigable_page_content_type_ids()
+    if navigable_content_type_ids:
+        pages = Page.objects.raw("""
+            SELECT * FROM core_page
+            WHERE numchild > 0 OR content_type_id IN %s OR depth = 2
+            ORDER BY path
+        """, [tuple(navigable_content_type_ids)])
+    else:
+        pages = Page.objects.raw("""
+            SELECT * FROM core_page
+            WHERE numchild > 0 OR depth = 2
+            ORDER BY path
+        """)
+
+    # Turn this into a tree structure:
+    #     tree_node = (page, children)
+    #     where 'children' is a list of tree_nodes.
+    # Algorithm:
+    # Maintain a list that tells us, for each depth level, the last page we saw at that depth level.
+    # Since our page list is ordered by path, we know that whenever we see a page
+    # at depth d, its parent must be the last page we saw at depth (d-1), and so we can
+    # find it in that list.
+
+    depth_list = [(None, [])]  # a dummy node for depth=0, since one doesn't exist in the DB
+
+    for page in pages:
+        # create a node for this page
+        node = (page, [])
+        # retrieve the parent from depth_list
+        parent_page, parent_childlist = depth_list[page.depth - 1]
+        # insert this new node in the parent's child list
+        parent_childlist.append(node)
+
+        # add the new node to depth_list
+        try:
+            depth_list[page.depth] = node
+        except IndexError:
+            # an exception here means that this node is one level deeper than any we've seen so far
+            depth_list.append(node)
+
+    # in Verdant, the convention is to have one root node in the db (depth=1); the menu proper
+    # begins with the children of that node (depth=2).
+    try:
+        root, root_children = depth_list[1]
+        return root_children
+    except IndexError:
+        # what, we don't even have a root node? Fine, just return an empty list...
+        []
+
+
+class Orderable(models.Model):
+    sort_order = models.IntegerField(null=True, blank=True, editable=False)
+
+    class Meta:
+        abstract = True
+        ordering = ['sort_order']

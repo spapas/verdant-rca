@@ -9,7 +9,7 @@ $(function(){
         animationClasses : {
             classin : 'dl-animate-in-2', 
             classout : 'dl-animate-out-2'
-        }
+        } 
     });
 
     // Resize nav to fit height of window. This is an unimportant bell/whistle to make it look nice
@@ -37,6 +37,23 @@ $(function(){
         $(this).closest('li').removeClass('focused')
     });
 
+    /* tabs */
+    $('.tab-nav a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show');
+    });   
+
     // Add class to the body from which transitions may be hung so they don't appear to transition as the page loads
     $('body').addClass('ready'); 
+
+    $('.dropdown-toggle').bind('click', function(){
+        $(this).closest('.dropdown').toggleClass('open');
+    });
+
+    /* Bulk-selection */
+    $(document).on('click', 'thead .bulk', function(){
+        $(this).closest('table').find('tbody .bulk input').each(function(){
+            $(this).prop('checked', !$(this).prop('checked'));            
+        })
+    });
 })

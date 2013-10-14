@@ -1,5 +1,6 @@
-{% if page.path != "news.html" and page.path != "staff-profile.html" and page.path != "student-profile.html" and page.path != "job.html" %}
-
+{% if page.path != "news.html" and page.path != "staff-profile.html" and page.path != "student-profile.html" and page.path != "job.html" and page.path != "rcanow.html" and page.path != "rcanow-index.html" %}
+    
+    {% if page.path != "events-index.html" %}
     <div class="today expanded">
         <h2>Events</h2>
         <ul>
@@ -26,6 +27,7 @@
             </li>
         </ul>
     </div>
+    {% endif %}
 
     <!-- adverts -->
     <div class="apply">
@@ -43,11 +45,11 @@
         </div>
     {% endif %}
 
-    {% if page.path != "event.html" and page.path != "job.html" %}
+    {% if page.path != "event.html" and page.path != "job.html" and page.path != "contact.html" and page.path != "rcanow-index.html" %}
         <div class="related expanded">
-            <h2>Related links</h2>
+            <h2>In this section</h2>
             <div class="wrapper">
-                <h3 class="dark">In this section</h3>
+                <!-- <h3 class="dark">In this section</h3> -->
                 <ul>
                     <li><a href="">Entrance requirements</a></li>
                     <li><a href="">Partnerships Awards &amp; scholarships</a></li>
@@ -135,4 +137,62 @@
             <p>School: Design</p>
         </a>
     </div>
+{% endif %}
+
+{% if page.path == "rcanow.html" %}
+	<ul class="related-projects">
+        <li>
+            <a href="#">
+                <div class="image"><img src="http://instasrc.com/224x126/nature" /></div>
+                <div class="content">
+                    <h2 class="h8">Project Title</h2>
+                    <p class="bc5">Student Name</p>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <div class="image"><img src="http://instasrc.com/224x126/people" /></div>
+                <div class="content">
+                    <h2 class="h8">Project Title</h2>
+                    <p class="bc5">Student Name</p>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <div class="image"><img src="http://instasrc.com/224x126/animal" /></div>
+                <div class="content">
+                    <h2 class="h8">Project Title</h2>
+                    <p class="bc5">Student Name</p>
+                </div>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <div class="image"><img src="http://instasrc.com/224x126/architecture" /></div>
+                <div class="content">
+                    <h2 class="h8">Project Title</h2>
+                    <p class="bc5">Student Name</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+{% endif %}
+
+{% if page.path == "rcanow-index.html" %}
+    <div class="related expanded">
+            <h2>Tags</h2>
+            <div class="wrapper">
+                <!-- <h3 class="dark">In this section</h3> -->
+                <ul>
+                    <li><a href="">animation (12)</a></li>
+                    <li><a href="">glassmaking (5)</a></li>
+                    <li><a href="">fashion (2)</a></li>
+                    <li><a href="">design (1)</a></li>
+                    <li><a href="">architecture (1)</a></li>
+                    <li><a href="">illustration (1)</a></li>
+                </ul>
+            </div>
+        </div>
 {% endif %}

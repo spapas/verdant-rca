@@ -1,11 +1,12 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 import json
 
 from verdantadmin.modal_workflow import render_modal_workflow
-from verdantimages.models import Image
-from verdantimages.forms import ImageForm, ImageInsertionForm
-from verdantimages.formats import FORMATS_BY_NAME
+from verdantimages.models import get_image_model
+from verdantimages.forms import get_image_form, ImageInsertionForm
+from verdantadmin.forms import SearchForm
+from verdantimages.formats import get_image_format
 
 
 def get_image_json(image):
@@ -26,17 +27,29 @@ def get_image_json(image):
     })
 
 def chooser(request):
-    images = Image.objects.order_by('title')
-    form = ImageForm()
+    Image = get_image_model()
+    ImageForm = get_image_form()
+
+    uploadform = ImageForm()
+    images = []
+    if 'q' in request.GET:
+        searchform = SearchForm(request.GET)
+        if searchform.is_valid():
+            q = searchform.cleaned_data['q']
+            images = Image.search(q)
+        return render(request, "verdantimages/chooser/search_results.html", {
+            'images': images, 'will_select_format': request.GET.get('select_format')})
+    else:
+        searchform = SearchForm()
 
     return render_modal_workflow(
         request, 'verdantimages/chooser/chooser.html', 'verdantimages/chooser/chooser.js',
-        {'images': images, 'form': form, 'will_select_format': request.GET.get('select_format')}
+        {'images': images, 'uploadform': uploadform, 'searchform': searchform, 'will_select_format': request.GET.get('select_format')}
     )
 
 
 def image_chosen(request, image_id):
-    image = get_object_or_404(Image, id=image_id)
+    image = get_object_or_404(get_image_model(), id=image_id)
 
     return render_modal_workflow(
         request, None, 'verdantimages/chooser/image_chosen.js',
@@ -45,15 +58,19 @@ def image_chosen(request, image_id):
 
 
 def chooser_upload(request):
+    Image = get_image_model()
+    ImageForm = get_image_form()
+
     if request.POST:
         form = ImageForm(request.POST, request.FILES)
 
         if form.is_valid():
             image = form.save()
             if request.GET.get('select_format'):
+                form = ImageInsertionForm(initial={'alt_text': image.default_alt_text})
                 return render_modal_workflow(
                     request, 'verdantimages/chooser/select_format.html', 'verdantimages/chooser/select_format.js',
-                    {'image': image}
+                    {'image': image, 'form': form}
                 )
             else:
                 # not specifying a format; return the image details now
@@ -68,18 +85,18 @@ def chooser_upload(request):
 
     return render_modal_workflow(
         request, 'verdantimages/chooser/chooser.html', 'verdantimages/chooser/chooser.js',
-        {'images': images, 'form': form}
+        {'images': images, 'uploadform': form}
     )
 
 
 def chooser_select_format(request, image_id):
-    image = get_object_or_404(Image, id=image_id)
+    image = get_object_or_404(get_image_model(), id=image_id)
 
     if request.POST:
-        form = ImageInsertionForm(request.POST, initial={'alt_text': image.title})
+        form = ImageInsertionForm(request.POST, initial={'alt_text': image.default_alt_text})
         if form.is_valid():
 
-            format = FORMATS_BY_NAME[form.cleaned_data['format']]
+            format = get_image_format(form.cleaned_data['format'])
             preview_image = image.get_rendition(format.filter_spec)
 
             image_json = json.dumps({
@@ -87,11 +104,13 @@ def chooser_select_format(request, image_id):
                 'title': image.title,
                 'format': format.name,
                 'alt': form.cleaned_data['alt_text'],
+                'class': format.classnames,
                 'preview': {
                     'url': preview_image.url,
                     'width': preview_image.width,
                     'height': preview_image.height,
-                }
+                },
+                'html': format.image_to_editor_html(image, form.cleaned_data['alt_text']),
             })
 
             return render_modal_workflow(
@@ -99,7 +118,7 @@ def chooser_select_format(request, image_id):
                 {'image_json': image_json}
             )
     else:
-        form = ImageInsertionForm(initial={'alt_text': image.title})
+        form = ImageInsertionForm(initial={'alt_text': image.default_alt_text})
 
     return render_modal_workflow(
         request, 'verdantimages/chooser/select_format.html', 'verdantimages/chooser/select_format.js',

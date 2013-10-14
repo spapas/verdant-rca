@@ -1,36 +1,16 @@
+body.page-editor{
+    padding-bottom:100px; /* provides space for the actions bar at the bottom */
+}
 .objects{
-    .full-width();
-
     .object{
         .push-padding(@grid-content-indent);
-        .pull-padding(@grid-content-indent);
+        padding-right:@grid-gutter-width/2;
         position:relative;
         border:1px dashed @color-input-border;
         border-width:1px 0 0 0;
 
-        > h2{
-            .border-radius(2px);
-            color: @color-text-grey;
-            text-transform:uppercase;
-            padding:2px 5px;
-            position:absolute;
-            top:0;
-            left:0;
-            margin-top:-1px;
-            font-size:0.7em;
-            z-index:1;
-        }
-
-        .object-help{
-            .column(2);
-            margin-top:2em;
-            
-            position:absolute;
-            right:0;
-            top:0;
-        }
-        &:hover .object-help{
-            opacity:1;
+        &:first-child{
+            border:0;
         }
 
         &.focused{
@@ -42,18 +22,39 @@
             padding-left:0;
         }
 
-    }
+        .object-help{
+            .column(2);
+            display:block;
+            position:absolute;
+            z-index:1;
+            right:0;
+            top:0;
+            padding-right:@grid-gutter-width/2;
+            float:right;
+            margin-top:4em;
+            text-align:right;
+            opacity:0;
+        }
+
+        &:hover .object-help{
+            opacity:1;
+        }
+    }    
+
     .multiple{
-        .full-width();
+
     }
     .multiple > li{
-        .push-padding(@grid-content-indent);
-        .pull-padding(@grid-content-indent);
-        border-top: 1px dashed @color-input-border;
+        border-bottom: 1px dashed @color-input-border;
+    }
 
-        &:first-child{
-            border:0;
-        }
+    /* styles applied to an element as it is being reordered */
+    .multiple.moving{
+        position:relative;
+    }
+    .multiple li.moving{
+        position:absolute;
+        width:100%;
     }
 
     .preview{
@@ -61,21 +62,34 @@
         padding-bottom:0.5em;
     }
 
+    .single-field{
+        h2, .object-help{
+            display:none; /* The field label is used instead */
+        }
+    }
+
+
     /* Special full-width, one-off fields i.e a single text or textarea input */
     .full{
-         
-        > .help{
-            position:absolute;
-            right:0;
-            top:0;
-            z-index:1;
+        padding:0;
+
+        h2{
+            display:none; /* The field label is used instead */
         }
+
+        .object-help{
+            display:block;
+        }
+        
         fieldset{
             display:block;
             float:none;
-            width:initial;
+            width:auto;
             padding:0;
-            .full-width();
+
+            .help{
+                display:none;
+            }
         }
         li{
             padding:0;
@@ -85,23 +99,19 @@
             padding:0;
         }
 
-        label{
-            .visuallyhidden();
-        }
-        input, textarea{
-            .border-radius(0px);
-            .push-padding(@grid-content-indent);
+        input, textarea, .richtext{
+            .nice-padding;
             .pull-padding(2);
+            font-family:Bitter, Georgia, serif;
+            .border-radius(0px);
             border:0;
             padding-top:3em;
             padding-bottom:2em;
+            font-size:1.2em;
+            line-height:1.6em;
         }
 
-        .title input,
-        .title textarea{
-            font-size:2em;
-            padding-top:2em;
-        }
+        
         .error-message{
             .push(@grid-content-indent);
             .pull(@grid-content-indent);
@@ -115,25 +125,68 @@
         }
     }
 
+   
+    .object > h2, .single-field label{
+        .border-radius(2px);
+        color: @color-text-grey;
+        text-transform:uppercase;
+        padding:2px 5px;
+        position:absolute;
+        top:0;
+        left:0;
+        margin-top:-1px;
+        font-size:0.7em;
+        z-index:1;
+        margin:0.2em 0;
+        line-height:1.5em;
+        font-weight:normal;
+    }
+
+    .title input,
+    .title textarea{
+        font-size:2em;
+        padding-top:2em;
+    }
+
+    /* wrapper around add button for mutliple objects */
+    p.add{
+        font-weight:700;
+        cursor:pointer;
+        margin-top:0;
+        margin-bottom:0;
+        padding-top:3em;
+        padding-bottom:3em;
+    }
 
     /* Object controls */
     .controls{
-        float:right;
-        margin-right:5%;
+        position:absolute;
+        right:@grid-gutter-width/2;
         text-transform:uppercase;
-        color:@color-grey;    
+        color:@color-grey;
         
         li{
-            position:relative;
+            background-color:lighten(@color-grey-lighter, 5%);
+            display:inline-block;
+            cursor:pointer;
         }
         .icon{
-           
+            padding:0.3em;
+        }
+        .icon:before{
+            vertical-align:middle;
+            font-size:20px;
+            line-height:1.8em;
+        }
+        .icon:hover{
+            background-color:@color-teal;
+
             &:before{
-               opacity:0.5;
+                color:white;
             }
         }
-        .move-updown-black{
-            cursor:move;
+        .disabled{
+            display:none;
         }
     }
 }

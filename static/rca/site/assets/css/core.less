@@ -88,24 +88,27 @@ a {
     }
 }
 
-ul li {
+ul {
+    margin: 0;
+    padding: 0;
     list-style-type: none;
-    &:before {
-        content: '\002D\00A0\00A0\00A0\00A0\00A0'; /* 002D is hex for a hyphen, 00A0 is hex for nbsp */
-        margin-left: -1.5em;
-    }
-}
-
-ul ul, ol ol {
-    margin-top: 0; /* make sure nested lists don't have a big space before the indented item */
-    li {
-        font-style: italic;
-    }
 }
 
  dd {
     margin: 0; /* override normalize */
  }
+
+
+.chromeframe{
+    font-family:Arial;
+    background:@color-dark-grey;
+    padding:10px;
+    color:white;
+    margin:0;
+    a{
+        text-decoration:underline;
+    }
+}
 
 
  /**
@@ -426,7 +429,7 @@ makes sure that doesn't happen. NB may no longer be needed if we definitely have
 header {
     .clearfix();
     height: @header-height-mobile;
-    z-index: 200;
+    z-index: 4000;
     position: relative;
     .site-name {
         margin-left:-2px; /* necessary to give space for 2 x 1px gaps beside other headers buttons */
@@ -522,6 +525,8 @@ header {
         background-color:transparent;
         text-indent: -9999px;
         border: 0;
+        position: relative;
+        top: 2px;
     }
  }
 
@@ -538,37 +543,38 @@ nav {
     background-color:rgba(255,255,255,0.95);
     border-bottom: 1px solid @color-medium-grey; /* fallback for ie 8 */
     border-bottom: 1px solid fade(@color-medium-grey, 40%);
-    padding:10px @grid-gutter-width;
+    padding:8px @grid-gutter-width;
     position:relative;
     z-index:999;
     height:150px; /* gets overridden by finding tallest submenu */
     overflow:hidden;
-
-    &:after {
-        .sprite-load(-53px, -1178px, 27px, 15px);
-        content: ' ';
-        position: absolute;
-        top: @spacing-half;
-        right: @spacing-half;
-    }
 }
     nav.open:after{
         .sprite-load(-17px, -1178px, 27px, 15px);
     }
+
     .js nav {
-        height:34px; /* adjusted by eye to match search box */
+        height:34px;  //adjusted by eye to match search box 
     }
 
     nav h2{
         margin:0;
         font-size: 12px;
         text-transform:uppercase;
-        line-height: 20px;
         float:left;
         padding-right:0.4em;
+        line-height:1.6em;
         font-weight:normal;
-    }
 
+        &:after{
+            content:"/";
+            font-size:12px;
+            padding-left:5px;
+            display:inline-block;
+            font-weight:bold;
+            color:black;
+        }
+    }    
     nav.dl-menuwrapper{
         margin:0;
         height:initial;
@@ -581,15 +587,15 @@ nav {
         list-style:none;
     }
     nav ul {
-        .unlist();
         position:absolute;
         top:0;
-        left:55px;
         width:100%;
     }
-
         nav > ul{
-            top:10px;
+            top:8px; /* Same value as padding-top of nav element */
+            left:70px;
+            width:94%;
+            max-width:800px;
         }
 
         nav.ready .menu{
@@ -613,15 +619,19 @@ nav {
         }
         nav li {
             display:block;
-            width:20%;
-            line-height:20px;
+            width:25%;
+            overflow:hidden;
+            line-height:1.3em;
         }
             nav.dl-menuwrapper li {
                 width:100%;
             }
             nav li > ul{
                 display:none;
-                left:20%;
+                left:25%;
+                /* increases hover-area to include space below visible items */
+                padding-bottom:200px;
+                margin-bottom:-200px;
             }
                 nav.dl-menuwrapper li > ul{
                     display:block;
@@ -631,54 +641,76 @@ nav {
                 nav li.selected > ul {
                     display:block;
                 }
-
+               
                 nav a{
                     font-size:12px;
-                    line-height:20px;
                     color:#999;
                     text-decoration:none;
                     text-transform:uppercase;
                     display:block;
-                    padding-left:10px;
-                }
-                nav a:hover{
-                    color:rgb(0,150,255);
-                }
+                    position:relative;
+                    padding-right:7%;
+
+                    &:hover{
+                        color:rgb(0,150,255) !important;
+                    }
+               
+                    &:after{
+                        position:absolute;
+                        margin-left:2%;
+                        width:10px;
+                        content:"/";
+                        font-size:12px;
+                        display:inline-block;
+                        visibility:hidden;
+                        font-weight:bold;
+                        color:black;
+                    }
+                   
+                }   
+
                 nav .selected > a{
                     color:black;
 
-                }
-                nav a:before{
-                    float:left;
-                    margin-left:-10px;
-                    width:10px;
-                    content:"/";
-                    font-size:12px;
-                    line-height:20px;
-                    display:block;
-                    visibility:hidden;
-                    font-weight:bold;
-                    color:black;
-                }
-                    nav li.selected > a:before {
+                     &:after{
                         visibility:visible;
                     }
-
-                nav a:after{
-                    float:right;
-                    width:10px;
-                    content:"/";
-                    font-size:12px;
-                    line-height:20px;
-                    display:block;
-                    visibility:hidden;
-                    font-weight:bold;
-                    color:@color-highlight-blue;
-                }
-                nav a:hover:after{
-                    visibility:visible;
                 }
 
+                
+                /* contains behaviours only when the menu is open AND mouseovered */
+                nav.hovered{
+                    /* hide 'selected' styles, namely colour and after */
+                    .selected > a {
+                        color:#999;
+
+                        &:after{
+                            visibility:hidden;
+                        }
+                    }
+
+                    li:hover > a{
+                        color:black;
+                        &:after{
+                            visibility:visible;
+                        }
+                        &:hover:after{
+                            visibility:hidden;
+                        }
+                    }
+
+                    li.open > a{
+                        &:after{
+                            visibility:visible;
+                        }
+                        &:hover:after{
+                            color:@color-highlight-blue;
+                            visibility:visible;
+                        }                      
+                    }
+                }               
+
+               
     .js .menu.ready {
         visibility:hidden;
     }
@@ -690,6 +722,7 @@ nav {
 
     .breadcrumb{
         width:100%;
+        max-width:100%;
         position:relative;
         top:0;
         left:0;
@@ -701,10 +734,22 @@ nav {
     }
     .breadcrumb a{
         display:block;
-
+        width:auto;
+        padding:0;
+        &:before{
+            width:10px;
+            content:"/";
+            font-size:12px;
+            display:inline-block;
+            font-weight:bold;
+            color:black;
+        }
         &:after{
             display:none;
         }
+    }
+    .breadcrumb li:first-child a:before{
+        display:none;
     }
 
 
@@ -735,7 +780,6 @@ nav.expanded {
 
 .row {
     .row();
-    .unlist();
 }
 
 .row-flush {
@@ -762,7 +806,6 @@ nav.expanded {
         }
     }
     ul {
-        .unlist();
         padding: 0;
         margin: 0;
         background-color: fade(@color-charcoal,90%);
@@ -847,7 +890,7 @@ nav.expanded {
         .sprite-load(-17px, -1178px, 27px, 15px);
     }
     &:hover:after {
-        .sprite-load(-17px, -623px, 27px, 15px);
+        background-position:-17px -623px;
     }
 }
 
@@ -873,7 +916,7 @@ nav.expanded {
             background-color: @color-pink;
             color: @color-white;
             &:after {
-                .sprite-load(-53px, -623px, 27px, 15px);
+                background-position:-53px -623px;
             }
         }
     }
@@ -888,7 +931,7 @@ nav.expanded {
         border-bottom: 1px solid @color-black;
         padding: @spacing-one 0;
         margin: 0 @spacing-half;
-        &.last {
+        &:last-child {
             border: none;
         }
         h3 {
@@ -918,15 +961,7 @@ div.related-content-item {
         //.clearfix();
     }
     a.index-page-link {
-        position: relative;
-        &:after {
-            content: '';
-            .sprite-load(-17px, -1220px, 7px, 13px);
-            opacity: 0.3;
-            position: absolute;
-            right: -10px;
-            top: 2px;
-        }
+        .chevron();
     }
     img {
         //height: 150px;
@@ -934,9 +969,6 @@ div.related-content-item {
     figcaption {
         .h7();
         margin-top: 8px;
-    }
-    a.index-page-link {
-        .module-title();
     }
 }
 
@@ -980,7 +1012,7 @@ footer {
             cursor: pointer;
         }
         .footer-expand:hover {
-            .sprite-load(-53px, -1729px, 27px, 15px);
+            background-position:-53px -1729px;
         }
 
         > a{
@@ -996,7 +1028,7 @@ footer {
             .sprite-load(-17px, -623px, 27px, 15px);
         }
         .footer-expand:hover {
-            .sprite-load(-17px, -1729px, 27px, 15px);
+            background-position:-17px -1729px;
         }
         div.submenu-block {
             .clearfix();
@@ -1013,7 +1045,6 @@ footer {
         height: 48px;
     }
     ul {
-        .unlist();
         margin: 0;
         padding: 0;
         &.menu {
@@ -1145,6 +1176,20 @@ input[type=button], button, .button{
     }
 }
 
+/* link with chevron */
+.chevron {
+    .module-title();
+    position: relative;
+    &:after {
+        content: '';
+        .sprite-load(-17px, -1220px, 7px, 13px);
+        opacity: 0.3;
+        position: absolute;
+        right: -10px;
+        top: 2px;
+    }
+}
+
 /**
  * $Template specific styles
  */
@@ -1208,13 +1253,35 @@ input[type=button], button, .button{
         h2 {
             margin: -0.15em 0 0 0;
         }
-        ul.content {
-            .unlist();
-        }
         .location {
             color: @color-medium-grey;
             display: block;
         }
+    }
+}
+
+.type-jobs-index {
+    .one-plus {
+        li {
+            margin-top: @spacing-one;
+        }
+        li.col {
+                margin-top: @spacing-half;
+        }
+    }
+}
+
+.type-rcanow {
+    h1 {
+        margin-bottom: 0;
+    }
+}
+
+.type-contact {
+    .map {
+        width: 100%;
+        height: 300px;
+        background-color: #ccc;
     }
 }
 

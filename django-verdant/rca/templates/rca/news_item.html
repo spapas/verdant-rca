@@ -1,30 +1,24 @@
-{% extends "rca/editorial_page.html" %}
+{% extends "rca/base.html" %}
 
-{% load image_tags %}
+{% block body_class %}
+    type-news
+{% endblock %}
 
-{% block pre_content %}
-    {% if self.author %}
-        {% image self.author.mugshot fill-64x64 %}
-        <p>By <a href="{{ self.author.url }}">{{ self.author.title }}</a></p>
-    {% endif %}
-
-    {% image self.lead_image max-640x480 %}
+{% block content %}
+    <h1 class="h1">{{ self.title }}</h1>
+    {% include "rca/includes/modules/carousel.html" %}
+    <section class="row">
+        {% include "rca/includes/modules/body-text.html" with showIntro="true" %}
+        {% include "rca/includes/modules/meta-data.html" with showNewsMeta="true" %}
+    </section>
+    {% include "rca/includes/modules/twitter-feed.html" %}
 {% endblock %}
 
 {% block sidebar %}
-    {% with self.generic_related_links.all as related_links %}
-        {% if related_links %}
-            <h2>Related links</h2>
-            <ul>
-                {% for link in related_links %}
-                    <li>
-                        <a href="{{ link.url }}">
-                            {% image link.image fill-64x64 %}
-                            {{ link.link_text }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% include "rca/includes/sidebar.html" with showRelatedNews="true" %}
 {% endblock %}
+
+<!--
+To dos:
+- listing page image not feature image
+-->

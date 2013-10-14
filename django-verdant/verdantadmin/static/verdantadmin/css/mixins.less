@@ -11,9 +11,13 @@
 
 .unlist(){
     &, ul, li{
-        margin:0;
-        padding:0;
         list-style-type:none;
+        font-style: normal;
+    }
+    &, ul{
+        margin-top:0;
+        margin-bottom:0;
+        padding-left:0;
     }
 }
 
@@ -56,75 +60,11 @@
     }
 }
 
-/* Iconset defined twice to act as guards */
-.icon-set(left; @width:25px; @height:25px; @x:0; @y:0; @magnification:2){
-    .transition(all 0.2s linear);
-    padding-left:@width + 10px;
-    position:relative;
-
-    &:before{
-        .transition(opacity 0.3s ease);
-        position:absolute;
-        top:0;
-        left:1em;
-        bottom:0;
-        margin-top:auto;
-        margin-bottom:auto;
-        content:"";
-        display:inline-block;
-        height:@height;
-        width:@width;
-        text-indent:0px;
-        text-align:center;
-        .sprite(@x, @y, @magnification);
-    }
-    &:hover:before{
-        opacity:1;
-    }    
-}
-
-.icon-set(right; @width:25px; @height:25px; @x:0; @y:0; @magnification:2){
-    .transition(all 0.2s linear);
-    padding-right:@width + 10px;
-    position:relative;
-
-    &:before{
-        display:none;
-    }
-    &:after{
-        .transition(opacity 0.3s ease);
-        position:absolute;
-        top:0;
-        right:1em;
-        left:initial;
-        bottom:0;
-        margin-top:auto;
-        margin-bottom:auto;
-        content:"";
-        display:inline-block;
-        height:@height;
-        width:@width;
-        text-indent:0px;
-        text-align:center;
-        .sprite(@x, @y, @magnification);
-        
-    }
-    &:hover:after{
-        opacity:1;
-    }
-}
-
-.icon-left(@width:25px; @height:25px; @x:0; @y:0; @magnification:2){
-    .icon-set(left, @width, @height, @x, @y, @magnification);
-}
-
-.icon-right(@width:25px; @height:25px; @x:0; @y:0; @magnification:2){
-    .icon-set(right, @width, @height, @x, @y, @magnification);
-}
-
-.sprite(@x:0; @y:0; @magnification:2){
-    background-image: url(~"@{static-root}sprites.png");
-    background-position: -@x/(2/@magnification) -@y/(2/@magnification);
-    background-repeat: no-repeat;
-    background-size: 1000px/(2/@magnification) 1000px/(2/@magnification);
+.visuallyvisible(){
+    clip:none;
+    height:auto;
+    width:auto;
+    margin:auto;
+    overflow:visible;
+    position:initial;
 }
