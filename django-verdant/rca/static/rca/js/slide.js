@@ -1,9 +1,5 @@
-// ;setInterval(function(){
-//     $("iframe").remove();
-// }, 500);
 
 $(window).on("load", function(){
-// $(function(){
     var Affix = $('[data-spy="affix"]').eq(0).data('bs.affix').constructor;
     Affix.prototype.disable = function(){
         if(this.$element.length){
@@ -19,7 +15,7 @@ $(window).on("load", function(){
 });
 
 $(function(){
-    $("iframe").remove();
+    var duration = 800;
     function pixelToNumber(val){
         return parseInt(("" + val).replace(/[px]+/g, ""), 10);
     }
@@ -73,9 +69,16 @@ $(function(){
         $slider.css({
             width: "200%"
         });
+
         $right.css({
-            paddingTop: scrollY + 14
+            position: "static",
+            paddingTop: window.nextSlide ? scrollY + 14 : 200,
+            top: 0
         });
+
+        // setTimeout(function(){
+        //     debugger
+        // }, 1000)
 
         if(!isMobileLayout && ($headerLeft.height() < 80)){
             $headerRight
@@ -93,7 +96,7 @@ $(function(){
 
         $slider[animate]({
             marginLeft: "-100%"
-        }, 1000, function(){
+        }, duration, function(){
             $right.css({
                 paddingTop: 0
             });
@@ -127,10 +130,10 @@ $(function(){
         $headerLeft.data("bs.affix").disable();
         $headerLeft[animate]({
             left: "-200%"
-        }, 1000, function(){});
+        }, duration, function(){});
         $headerRight[animate]({
             left: "0"
-        }, 1000, function(){});
+        }, duration, function(){});
     }
 
     function slideLeft(){
@@ -181,7 +184,7 @@ $(function(){
 
         $slider[animate]({
             marginLeft: "0"
-        }, 1000, function(){
+        }, duration, function(){
             $right.css({
                 position: "fixed",
                 left: "100%",
@@ -203,13 +206,13 @@ $(function(){
 
         $headerLeft[animate]({
             left: "0"
-        }, 1000, function(){});
+        }, duration, function(){});
         if($headerRight.data("bs.affix")){
             $headerRight.data("bs.affix").disable();
         }
         $headerRight[animate]({
             left: "100%"
-        }, 1000, function(){});
+        }, duration, function(){});
     }
 
     window.slideRight = slideRight;
@@ -234,6 +237,11 @@ $(function(){
             return false;
         });
 
+        $(window).on('popstate.pjax', function(event) {
+            var st = event.state;
+            // .container;
+            // debugger
+        });
 
         $(document).on('pjax:end', function(event) {
             // $('#loading').hide()
@@ -242,29 +250,28 @@ $(function(){
             }
 
             $('[data-spy="affix"]').each(function () {
-              var $spy = $(this);
-              var data = $spy.data();
-
-              data.offset = data.offset || {};
-
-              if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
-              if (data.offsetTop)    data.offset.top    = data.offsetTop;
-
-              $spy.affix(data);
+                var $this = $(this);
+                var data = $this.data();
+                data.offset = data.offset || {};
+                if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
+                if (data.offsetTop)    data.offset.top    = data.offsetTop;
+                $this.affix(data);
             });
 
             if(nextSlide == "right"){
                 slideRight();
+                nextSlide = null;
             }else if(nextSlide == "left"){
                 slideLeft();
+                nextSlide = null;
             }else{
+                console.log($(".wrapper-left").css("left"));
                 if(pixelToNumber($(".wrapper-left").css("left")) < 0){
                     slideLeft();
                 }else{
                     slideRight();
                 }
             }
-            nextSlide = null;
         });
     }
 });
