@@ -355,6 +355,37 @@ ul {
     .clearfix();
     margin-top:1em;
 }
+    .wrapper-left, .wrapper-right{
+        display: inline-block;
+        width: 100%;
+        padding: 0 15px 0 15px; /* padding for mobile */
+    }
+    .wrapper-right{
+        position: fixed;
+        top: 0px;
+        left: 100%;
+    }
+    .slide-right {
+        .transform(translateZ(0));
+        .transform-style(preserve-3d);
+        .transform(translate3D(-100%, 0, 0));
+        .transition(-webkit-transform 1s ease-in-out);
+        .transition(   -moz-transform 1s ease-in-out);
+        .transition(    -ms-transform 1s ease-in-out);
+        .transition(     -o-transform 1s ease-in-out);
+        .transition(        transform 1s ease-in-out);
+    }
+    .slide-left {
+        .transform(translateZ(0));
+        .transform-style(preserve-3d);
+        .transform(translate3D(100%, 0, 0));
+        .transition(-webkit-transform 1s ease-in-out);
+        .transition(   -moz-transform 1s ease-in-out);
+        .transition(    -ms-transform 1s ease-in-out);
+        .transition(     -o-transform 1s ease-in-out);
+        .transition(        transform 1s ease-in-out);
+    }
+
 
 .page-content {
     .column(12);
@@ -477,7 +508,7 @@ header {
     top: 0;
     height: @header-height-mobile;
     width: 70%;
-    
+
     input[type="text"] {
         width: 90%;
         .t2;
@@ -524,7 +555,7 @@ nav {
     }
 
     .js nav {
-        height:34px;  //adjusted by eye to match search box 
+        height:34px;  //adjusted by eye to match search box
     }
 
     nav h2{
@@ -544,7 +575,7 @@ nav {
             font-weight:bold;
             color:black;
         }
-    }    
+    }
     nav.dl-menuwrapper{
         margin:0;
         height:initial;
@@ -611,7 +642,7 @@ nav {
                 nav li.selected > ul {
                     display:block;
                 }
-               
+
                 nav a{
                     font-size:12px;
                     color:#999;
@@ -624,7 +655,7 @@ nav {
                     &:hover{
                         color:rgb(0,150,255) !important;
                     }
-               
+
                     &:after{
                         position:absolute;
                         margin-left:2%;
@@ -636,8 +667,8 @@ nav {
                         font-weight:bold;
                         color:black;
                     }
-                   
-                }   
+
+                }
 
                 nav .selected > a{
                     color:black;
@@ -647,7 +678,7 @@ nav {
                     }
                 }
 
-                
+
                 /* contains behaviours only when the menu is open AND mouseovered */
                 nav.hovered{
                     /* hide 'selected' styles, namely colour and after */
@@ -676,11 +707,11 @@ nav {
                         &:hover:after{
                             color:@color-highlight-blue;
                             visibility:visible;
-                        }                      
+                        }
                     }
-                }               
+                }
 
-               
+
     .js .menu.ready {
         visibility:hidden;
     }
@@ -831,7 +862,7 @@ nav.expanded {
 .related {
     .mixin-grey-links;
     margin-top: @grid-gutter-width * 6;
-    
+
     h2 {
         .transition(background-color 0.3s ease);
         position: relative;

@@ -39,7 +39,7 @@
   Affix.RESET = 'affix affix-top affix-bottom'
 
   Affix.DEFAULTS = {
-    offset: 0
+    offset: 151
   }
 
   Affix.prototype.checkPositionWithEventLoop = function () {

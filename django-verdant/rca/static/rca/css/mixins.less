@@ -3,30 +3,48 @@
  *
  * MIXINS
  *
- * Includes all mixins that are shared across the site, 
+ * Includes all mixins that are shared across the site,
  * both parametric (function) mixins and standard mixins.
  *
  * MIXIN EXAMPLE:
  *  ul {
  *    .some-reusable-class;
  *  }
- * 
- * PARAMETRIC MIXIN EXAMPLE: 
+ *
+ * PARAMETRIC MIXIN EXAMPLE:
  *  .parametric-mixin(@param1, @param2) {
  *    color: @param1;
- *    background: @param2;   
+ *    background: @param2;
  *  }
  *
  */
 
 .transition(@transition){
     -webkit-transition: @transition;
-    -moz-transition: @transition;
-    -o-transition: @transition;
-    transition: @transition;
+       -moz-transition: @transition;
+        -ms-transition: @transition;
+         -o-transition: @transition;
+            transition: @transition;
 }
 
-/** 
+.transform(@transform){
+    -webkit-transform: @transform;
+       -moz-transform: @transform;
+        -ms-transform: @transform;
+         -o-transform: @transform;
+            transform: @transform;
+}
+
+.transform-style(@style){
+    -webkit-transform-style: @style;
+       -moz-transform-style: @style;
+        -ms-transform-style: @style;
+         -o-transform-style: @style;
+            transform-style: @style;
+}
+
+
+/**
 * Sprites file
 */
 
@@ -53,18 +71,18 @@
     position: absolute;
     width: 1px;
 
-    &:active, &:focus { 
-        clip: auto; 
-        height: auto; 
-        margin: 0; 
-        overflow: visible; 
-        position: static; 
-        width: auto; 
+    &:active, &:focus {
+        clip: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        position: static;
+        width: auto;
     }
 }
 
 
-/** 
+/**
 * Clearfix
 */
 .clearfix() {
@@ -111,7 +129,7 @@
     background-color: @color; /* fallback for ie8 */
     background-color: fade(@color, @fade);
     color:white;
-    
+
     h2, p {
         margin: 0;
     }
@@ -140,7 +158,7 @@
 
     .module-title{
         margin-top:0;
-        margin-bottom:@spacing-one; 
+        margin-bottom:@spacing-one;
 
         a:after{
             margin-left:0.5em;
@@ -170,7 +188,7 @@
     }
     li{
         vertical-align:top;
-        .column(8); 
+        .column(8);
         display:inline-block;
         white-space:normal;
         float:none;
