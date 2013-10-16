@@ -245,7 +245,7 @@ $(function(){
 
         $(document).on('pjax:end', function(event) {
             // $('#loading').hide()
-            if(window.leftStyle){
+            if(nextSlide && window.leftStyle){
                 $left.attr("style", leftStyle);
             }
 
@@ -265,7 +265,6 @@ $(function(){
                 slideLeft();
                 nextSlide = null;
             }else{
-                console.log($(".wrapper-left").css("left"));
                 if(pixelToNumber($(".wrapper-left").css("left")) < 0){
                     slideLeft();
                 }else{
