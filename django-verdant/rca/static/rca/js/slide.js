@@ -21,7 +21,7 @@ $(window).on("load", function(){
 $(function(){
     $("iframe").remove();
     function pixelToNumber(val){
-        return parseInt(("" + val).replace(/[\-px]+/g, ""), 10);
+        return parseInt(("" + val).replace(/[px]+/g, ""), 10);
     }
     var scrollY;
 
@@ -222,50 +222,49 @@ $(function(){
         // add pjax to links pinting to sub-pages
         $left.on("click", "a[href^='" + location.pathname + "'], a[href^='" + origin + location.pathname + "']", function(event){
             $.pjax.click(event, {container: $right.selector, fragment: $left.selector});
-            $(document).on('pjax:complete', function(event) {
-                // $('#loading').hide()
-
-                $('[data-spy="affix"]').each(function () {
-                  var $spy = $(this);
-                  var data = $spy.data();
-
-                  data.offset = data.offset || {};
-
-                  if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
-                  if (data.offsetTop)    data.offset.top    = data.offsetTop;
-
-                  $spy.affix(data);
-                });
-                slideRight();
-                $(document).off('pjax:complete');
-            });
+            nextSlide = "right";
             return false;
         });
         // add pjax to links pinting to the parent page
         // $right.on("click", "a[href='" + origin + location.pathname.split("/").slice(0,-2).join("/") + "/" + "']", function(){
         $right.on("click", "a", function(){
             leftStyle = $left.attr("style");
+            nextSlide = "left";
             $.pjax.click(event, {container: $left.selector, fragment: $left.selector});
-            $(document).on('pjax:complete', function(event) {
-                $left.attr("style", leftStyle);
-                // $('#loading').hide()
-
-                $('[data-spy="affix"]').each(function () {
-                  var $spy = $(this);
-                  var data = $spy.data();
-
-                  data.offset = data.offset || {};
-
-                  if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
-                  if (data.offsetTop)    data.offset.top    = data.offsetTop;
-
-                  $spy.affix(data);
-                });
-
-                slideLeft();
-                $(document).off('pjax:complete');
-            });
             return false;
+        });
+
+
+        $(document).on('pjax:end', function(event) {
+            // $('#loading').hide()
+            if(window.leftStyle){
+                $left.attr("style", leftStyle);
+            }
+
+            $('[data-spy="affix"]').each(function () {
+              var $spy = $(this);
+              var data = $spy.data();
+
+              data.offset = data.offset || {};
+
+              if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
+              if (data.offsetTop)    data.offset.top    = data.offsetTop;
+
+              $spy.affix(data);
+            });
+
+            if(nextSlide == "right"){
+                slideRight();
+            }else if(nextSlide == "left"){
+                slideLeft();
+            }else{
+                if(pixelToNumber($(".wrapper-left").css("left")) < 0){
+                    slideLeft();
+                }else{
+                    slideRight();
+                }
+            }
+            nextSlide = null;
         });
     }
 });
