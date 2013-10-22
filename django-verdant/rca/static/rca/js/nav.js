@@ -1,116 +1,172 @@
 $(function(){
 
-	Harvey.attach('screen and (max-width:767px)', {
-		setup: function(){}, // called when the query becomes valid for the first time
+	$(".mobile-menu-button").click(function(){
+		if($(".mobile-menu-wrapper").width() === 0){
+			$(".mobile-content-wrapper").width($(".mobile-content-wrapper").width() + "px");
+			$("body")
+				.css({
+					"width": "150%",
+					"overflow-x": "hidden"
+				})
+				.addClass("show-mobile-menu");
+		}else{
+			$("body").removeClass("show-mobile-menu");
+			setTimeout(function(){
+				$("body, .mobile-content-wrapper").removeAttr("style");
+			}, 1100);
+		}
+		return false;
+	});
+
+	// copy the sidebar so that we can show it on the left in the mobile version
+	if(!$(".mobile-menu-wrapper > aside").length){
+		$(".mobile-menu-wrapper").append($(".page-wrapper > aside").clone(true, true));
+	}
+
+	Harvey.attach(breakpoints.mobile, {
+		setup: function(){},
 		on: function(){
 			$('nav').addClass('dl-menuwrapper').dlmenu({
-				animationClasses : { 
-					classin : 'dl-animate-in-2', 
-					classout : 'dl-animate-out-2' 
+				animationClasses : {
+					classin : 'dl-animate-in-2',
+					classout : 'dl-animate-out-2'
 				}
 			});
-		}, // called each time the query is activated
+		},
 		off: function(){
 			$('nav').removeClass('dl-menuwrapper').removeData();
 			$('nav *').removeClass('dl-subview dl-subviewopen');
 			$('nav .dl-back').remove();
 
-		} // called each time the query is deactivated
+			// remove width from page content which is needed to keep it constant when showing the mobile menu
+			$("body").removeClass("show-mobile-menu");
+			$("body, .mobile-content-wrapper").removeAttr("style");
+
+		}
 	});
-	Harvey.attach('screen and (min-width:768px)', {
-		setup: function(){}, // called when the query becomes valid for the first time
+	Harvey.attach(breakpoints.desktopSmall, {
+		setup: function(){},
 		on: function(){
+			/* Duplicate anything added to this function, into the ".lt-ie9" section below */
+
+			//enable desktop dropdown nav
 			desktopNav.apply()
-		}, // called each time the query is activated
+		},
 		off: function(){
+			//kill desktop dropdown nav
 			desktopNav.revoke()
-		} // called each time the query is deactivated
+		}
 	});
+
+	/* IE<9 targetted execution of above desktopSmall Harvey stuff, since media queries aren't understood */
+	$('.lt-ie9').each(function(){
+		desktopNav.apply()
+	})
 
 });
 
 var desktopNav = {
 	apply: function(){
+		$(".menu a[href$='" + document.location.pathname + "']").parents("li").addClass("selected");
 		$('.nav-wrapper nav:not(.dl-menuwrapper)').each(function(){
-			// find tallest submenu
+			var $self = $(this);
 			var maxHeight = 0;
-			$(this).find('ul').each(function(){
+			var selected = $('.selected', $self).clone();
+			var menu = $('.menu', $self);
+			var toggle = $('h2', $self);
+
+			// find tallest submenu
+			$self.find('ul').each(function(){
 				maxHeight = ($(this).height() > maxHeight) ? $(this).height() : maxHeight
 			})
 
-			$(this).data('maxHeight', maxHeight + 16);
-
-			var selected = $(this).find('.selected').clone();
+			/* create breadcrumb menu from selected items */
 			selected.find('ul').remove();
-			$(this).append($('<ul class="breadcrumb"></ul>').append(selected));
-			$(this).addClass('ready')
+			menu.before($('<ul class="breadcrumb"></ul>').append(selected));
 
-			var $self = $(this);
+			$self.data('maxHeight', maxHeight + 70);
 
-			$self.hoverIntent({
-				over: function(){
-					$self.addClass('changing');
-					setTimeout(function(){
-						$self.removeClass('changing');
-					}, 400)
+			// set menu as ready
+			$self.addClass('ready');
 
-					$self.find('.breadcrumb').stop().hide();
+			function openMenu(){
+				$self.addClass('changing');
+				setTimeout(function(){
+					$self.removeClass('changing');
+				}, 400)
 
-					$self.stop().animate({
-						height: $self.data('maxHeight')
-					},200, function(){
-						$self.removeClass('changing').addClass('open');
-					})
+				$self.find('.breadcrumb').stop().hide();
 
-					$self.find('.menu').stop().fadeIn(200, function(){
-						//necessary to avoid some kind of weird race bug where opacity stops getting changed to 1
-						$self.find('.menu').css({opacity:1,display:'block'})
-						$self.removeClass('changing').addClass('open');
-					});
-				}, 
-				out: function(){
+				$self.stop().animate({
+					height: $self.data('maxHeight')
+				},200, function(){
+					$self.removeClass('changing').addClass('open');
+				})
 
-					$self.addClass('changing').removeClass('hovered');
-				
-					$self.find('.menu').stop().hide()
+				menu.stop().fadeIn(200, function(){
+					//necessary to avoid some kind of weird race bug where opacity stops getting changed to 1
+					menu.css({opacity:1,display:'block'})
+					$self.removeClass('changing').addClass('open');
+				});
+			}
 
-					$self.stop().animate({
-						height: 34
-					}, 200, function(){
-						$self.find('.selected > ul').stop().show()
-						$self.removeClass('changing').removeClass('open');
-					});
+			function closeMenu(){
+				console.log('closing');
+				$self.addClass('changing').removeClass('hovered');
 
-					$self.find('li:not(.selected) > ul').stop().fadeOut(100, function(){
-						$(this).find('.selected > ul').fadeIn(100)
-					});
+				// reset or submenu
+				setTimeout(function(){
+					$('ul', menu).stop().removeAttr('style');
+				}, 600)
 
-					$self.find('.breadcrumb').stop().fadeIn(200, function(){
-						$(this).removeClass('changing');
-					})
-				},
-				timeout:500
-			})	
 
-			$('li', $self).hoverIntent({
-				over: function(){
-					$('li', $self).removeClass('open');
-					$self.addClass('hovered');
-					$(this).addClass('open');
-					$(this).siblings().find(' > ul').stop().hide()
-					$(this).find(' > ul').fadeIn(200);
-				},
-				out: function(){
-					$(this).removeClass('open');
-					if(!$('nav').hasClass('changing')){
-						$(this).find('> ul').stop().hide();
-					}
-				},
-				timeout: 600
+				menu.stop().hide()
+
+				$self.stop().animate({
+					height: 34
+				}, 200, function(){
+					// $self.find('.selected > ul').stop().show()
+					$self.removeClass('changing').removeClass('open');
+				});
+
+				$self.find('li:not(.selected) > ul').stop().fadeOut(100, function(){
+					$(this).find('.selected > ul').fadeIn(100)
+				});
+
+				$self.find('.breadcrumb').stop().fadeIn(200, function(){
+					$(this).removeClass('changing');
+				})
+			}
+
+			// open/close menu based on toggle click
+			toggle.click(function(){
+				if($self.hasClass('open')){
+					closeMenu();
+				}else{
+					openMenu();
+				}
 			});
-			$('li' ,$self).bind('mouseout', function(){
-				
-			})
+
+			// close menu on all clicks outside the toggle
+			$(document).on('click', function(e){
+				if($(e.target).get(0) != toggle.get(0)){
+					closeMenu();
+				}
+			});
+
+			$('li', menu).hoverIntent({
+				over: function(e){
+					$self.addClass('hovered');
+
+					$('.open', $(this).parent()).removeClass('open');
+					$(this).addClass('open').parents('li').addClass('open');
+
+					$(this).siblings().find(' > ul').stop().hide();
+					$(this).find(' > ul').stop().fadeIn(200);
+				},
+				out: function(){},
+				timeout: 200
+			});
 		});
 	},
 

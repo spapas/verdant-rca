@@ -21,6 +21,7 @@
 /**
  * Contents...................You’re reading it!
  * Reset and body styles......Any remaining browser reset styles, body text style
+ * Mobile menu styles.........Only visible in mobile layout
  * Images.....................img and picture
  * Links and lists............default styles for links and lists
  * Typography.................reusable typographical styles
@@ -53,6 +54,78 @@ body {
     font-size: @font-size-base;
     font-family: @font-family-benton-light;
     -webkit-font-smoothing: antialiased; /* Do not remove! */
+}
+
+html, body {
+    height: 100%;
+    min-height:100%;
+}
+
+/**
+ * $Mobile menu styles
+ */
+
+.mobile-content-wrapper{
+    position: relative;
+    overflow: hidden;
+    padding: 0 15px 0 15px; /* padding for mobile */
+}
+
+.mobile-menu-wrapper{
+    float: left;
+    overflow: hidden;
+    margin: 0;
+    width: 0%;
+    height: 100%;
+    .transition(width 1s ease-in-out);
+}
+
+body.show-mobile-menu{
+    .mobile-menu-wrapper{
+        width: 180px;
+        .transition(width 1s ease-in-out);
+    }
+}
+
+.mobile-menu-wrapper aside{
+    display: block;
+    width: 180px;
+    .related{
+        margin-top: 0;
+    }
+}
+
+
+.mobile-menu-button{
+    display: block;
+    position: absolute;
+    z-index: 3000;
+    left: 2em;
+    top: 6em;
+    background: #1E567C;
+    color: white;
+    padding: 8px 14px;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    outline: none !important;
+    transform: rotate(90deg);
+    transform-origin: top left;
+    -moz-transform: rotate(90deg);
+    -moz-transform-origin: top left;
+    -webkit-transform: rotate(90deg);
+    -webkit-transform-origin: top left;
+    -o-transform: rotate(90deg);
+    -o-transform-origin: top left;
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    zoom: 1;
+    &:hover{
+        cursor: pointer;
+    }
+}
+
+
+.lt-ie10 .mobile-menu-button{
+    left: 0;
 }
 
 
@@ -137,6 +210,12 @@ ul {
     span.light-grey{
         color:@color-light-grey;
     }
+    span.charcoal {
+        color:@color-charcoal;
+    }
+    span.black {
+        color:@color-black;
+    }
 }
 
 .ho-b-heading {
@@ -152,6 +231,7 @@ ul {
     font-size: @font-size-24;
     line-height: @line-height-12;
     margin-top: 0;
+    margin-bottom: @spacing-one;
     &.major {
         .ho-a-heading;
 
@@ -441,7 +521,7 @@ header {
     }
     .site-name p { /* logo */
         text-indent: -2000px;
-        background-image: url('../images/logo-header-mobile.png');
+        background-image: url('@{path-static}images/logo-header-mobile.png');
         background-repeat: no-repeat;
         display: block;
         width: 110px;
@@ -538,47 +618,21 @@ form.search.expanded {
  * $Top navigation
  */
 
+/* General menu styles */
 nav {
     background-color:white;
     background-color:rgba(255,255,255,0.95);
     border-bottom: 1px solid @color-medium-grey; /* fallback for ie 8 */
     border-bottom: 1px solid fade(@color-medium-grey, 40%);
-    padding:8px @grid-gutter-width;
+    padding:8px @grid-gutter-width/2;
     position:relative;
     z-index:999;
     height:150px; /* gets overridden by finding tallest submenu */
     overflow:hidden;
+    display: none;
 }
-    nav.open:after{
-        .sprite-load(-17px, -1178px, 27px, 15px);
-    }
-
-    .js nav {
-        height:34px;  //adjusted by eye to match search box 
-    }
-
-    nav h2{
-        margin:0;
-        font-size: 12px;
-        text-transform:uppercase;
-        float:left;
-        padding-right:0.4em;
-        line-height:1.6em;
-        font-weight:normal;
-
-        &:after{
-            content:"/";
-            font-size:12px;
-            padding-left:5px;
-            display:inline-block;
-            font-weight:bold;
-            color:black;
-        }
-    }    
-    nav.dl-menuwrapper{
-        margin:0;
-        height:initial;
-        overflow:visible;
+    nav.expanded {
+        display: block;
     }
 
     nav ul, nav li{
@@ -597,171 +651,49 @@ nav {
             width:94%;
             max-width:800px;
         }
-
-        nav.ready .menu{
-            display:none;
-        }
-        nav.changing ul{
-            pointer-events:none;
-        }
-        nav.dl-menuwrapper ul{
-            left:0;
-            top:initial;
-            background-color:white;
-            position:relative;
-            width:auto;
-        }
-        nav .children{
-            display:none;
-        }
-        nav.dl-menuwrapper .children{
-            display:block;
-        }
         nav li {
             display:block;
-            width:25%;
             overflow:hidden;
             line-height:1.3em;
         }
-            nav.dl-menuwrapper li {
-                width:100%;
-            }
-            nav li > ul{
-                display:none;
-                left:25%;
-                /* increases hover-area to include space below visible items */
-                padding-bottom:200px;
-                margin-bottom:-200px;
-            }
-                nav.dl-menuwrapper li > ul{
-                    display:block;
-                    left:0;
-                }
-
-                nav li.selected > ul {
-                    display:block;
-                }
-               
-                nav a{
-                    font-size:12px;
-                    color:#999;
-                    text-decoration:none;
-                    text-transform:uppercase;
-                    display:block;
-                    position:relative;
-                    padding-right:7%;
-
-                    &:hover{
-                        color:rgb(0,150,255) !important;
-                    }
-               
-                    &:after{
-                        position:absolute;
-                        margin-left:2%;
-                        width:10px;
-                        content:"/";
-                        font-size:12px;
-                        display:inline-block;
-                        visibility:hidden;
-                        font-weight:bold;
-                        color:black;
-                    }
-                   
-                }   
-
-                nav .selected > a{
-                    color:black;
-
-                     &:after{
-                        visibility:visible;
-                    }
-                }
-
-                
-                /* contains behaviours only when the menu is open AND mouseovered */
-                nav.hovered{
-                    /* hide 'selected' styles, namely colour and after */
-                    .selected > a {
-                        color:#999;
-
-                        &:after{
-                            visibility:hidden;
-                        }
-                    }
-
-                    li:hover > a{
-                        color:black;
-                        &:after{
-                            visibility:visible;
-                        }
-                        &:hover:after{
-                            visibility:hidden;
-                        }
-                    }
-
-                    li.open > a{
-                        &:after{
-                            visibility:visible;
-                        }
-                        &:hover:after{
-                            color:@color-highlight-blue;
-                            visibility:visible;
-                        }                      
-                    }
-                }               
-
-               
-    .js .menu.ready {
-        visibility:hidden;
-    }
-
-    nav.dl-menuwrapper,
-    nav.ready .menu{
-        visibility:visible;
-    }
-
-    .breadcrumb{
-        width:100%;
-        max-width:100%;
-        position:relative;
-        top:0;
-        left:0;
-    }
-    .breadcrumb li{
-        float:left;
-        width:auto;
-        padding-right:0.4em;
-    }
-    .breadcrumb a{
-        display:block;
-        width:auto;
-        padding:0;
-        &:before{
-            width:10px;
-            content:"/";
+        nav a{
             font-size:12px;
-            display:inline-block;
-            font-weight:bold;
-            color:black;
+            color:#999;
+            text-decoration:none;
+            text-transform:uppercase;
+            display:block;
+            position:relative;
+            padding-right:7%;
+
+            &:hover{
+                color:rgb(0, 150, 255) !important;
+            }
         }
-        &:after{
-            display:none;
+
+/* DL menu styles */
+nav.dl-menuwrapper{
+    margin:0;
+    height:initial;
+    overflow:visible;
+    visibility:visible;
+}
+    nav.dl-menuwrapper ul{
+        left:0;
+        top:initial;
+        background-color:white;
+        position:relative;
+        width:auto;
+    }
+    nav.dl-menuwrapper .children{
+        display:block;
+    }
+        nav.dl-menuwrapper li {
+            width:100%;
         }
-    }
-    .breadcrumb li:first-child a:before{
-        display:none;
-    }
-
-
-
-
-nav {
-    display: none;
-}
-
-nav.expanded {
-    display: block;
-}
+            nav.dl-menuwrapper li > ul{
+                display:block;
+                left:0;
+            }
 
 /**
  *$Common grid divisions
@@ -837,8 +769,24 @@ nav.expanded {
  */
 
 /* advert */
-.apply {
-    .mixin-sidebar-advert(@color-rca-blue, 100%);
+.advert-grey {
+    .mixin-sidebar-advert(@color-dark-grey, 20%);
+}
+
+.advert-pale-blue {
+    .mixin-sidebar-advert(@color-highlight-blue, 10%);
+}
+
+.advert-green {
+    .mixin-sidebar-advert(@color-green, 85%);
+}
+
+.advert-blue {
+    .mixin-sidebar-advert(@color-rca-blue, 100%, white);
+}
+
+.advert-pink {
+    .mixin-sidebar-advert(@color-advert-pink, 100%, white);
 }
 
 .open-days{
@@ -864,6 +812,7 @@ nav.expanded {
     h2 {
         .transition(background-color 0.3s ease);
         position: relative;
+        cursor:pointer;
         &:after {
             content:' ';
             .sprite-load(-53px, -623px, 27px, 15px);
@@ -898,6 +847,7 @@ nav.expanded {
 
     h2 {
         .transition(background-color 0.3s ease);
+        cursor:pointer;
         margin: 0;
         padding: @spacing-half;
         .t2;
@@ -1037,7 +987,7 @@ footer {
     }
     a.footer-logo {
         display: block;
-        background-image: url('../images/logo-footer-mobile.png');
+        background-image: url('@{path-static}images/logo-footer-mobile.png');
         background-repeat: no-repeat;
         padding-top: 60px;
         text-indent: -9999px;
@@ -1236,8 +1186,23 @@ input[type=button], button, .button{
 .type-standard {
     .button-bar,
     .teaser-image,
-    .quotation {
+    .quotation,
+    .middle-column-body-text {
         margin-bottom: @spacing-two;
+        clear:both;
+    }
+    .button-bar li {
+        width: 100%;
+    }
+    .four figcaption {
+        float: right;
+        text-align: right;
+        margin-top: @spacing-one;
+    }
+
+    .four figure {
+        .clearfix();
+        margin-bottom: @spacing-one;
     }
 }
 

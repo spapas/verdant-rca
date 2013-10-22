@@ -49,7 +49,7 @@
 */
 
 .sprite-load (@positionX, @positionY, @width, @height) {
-    background-image: url(../images/sprites.png);
+    background-image: url("@{path-static}images/sprites.png");
     background-repeat: no-repeat;
     background-position: @positionX @positionY;
     width: @width;
@@ -124,12 +124,11 @@
 }
 
 /* sidebar advert */
-.mixin-sidebar-advert(@color, @fade:0) {
+.mixin-sidebar-advert(@color, @fade:0, @text-color:black) {
     .transition(background-color 0.3s ease);
     background-color: @color; /* fallback for ie8 */
     background-color: fade(@color, @fade);
-    color:white;
-
+    color:@text-color;
     h2, p {
         margin: 0;
     }
@@ -158,7 +157,7 @@
 
     .module-title{
         margin-top:0;
-        margin-bottom:@spacing-one; 
+        margin-bottom:@spacing-one;
 
         a:after{
             margin-left:0.5em;
@@ -209,6 +208,7 @@
         a{
             height:96px;
             width:96px;
+            outline:none;
         }
     }
     .h8, .bc5 {
