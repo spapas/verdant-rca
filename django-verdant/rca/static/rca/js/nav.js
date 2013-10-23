@@ -111,7 +111,6 @@ var desktopNav = {
 			}
 
 			function closeMenu(){
-				console.log('closing');
 				$self.addClass('changing').removeClass('hovered');
 
 				// reset or submenu

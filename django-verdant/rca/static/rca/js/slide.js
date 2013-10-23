@@ -30,10 +30,15 @@ $(function(){
     $right = $(".wrapper-right");
 
     function slideRight(){
+        var html = $(".pjax-container").html();
+        if(html){
+            $right.html(html);
+            $(".pjax-container").html("");
+        }
         $header = $(".header-wrapper");
         $headerLeft = $(".wrapper-left .header-wrapper");
         $headerRight = $(".wrapper-right .header-wrapper");
-        var isMobileLayout = $left.css("padding-left") != "0px";
+        var isMobileLayout = $(window).width() < 768;
         $('[data-spy="affix"]').each(function(){
             if(isMobileLayout){
                 if($(this).data("bs.affix")){
@@ -80,7 +85,7 @@ $(function(){
         //     debugger
         // }, 1000)
 
-        if(!isMobileLayout && ($headerLeft.height() < 80)){
+        if($headerLeft.height() < 80){
             $headerRight
             .removeClass("affix").addClass("affix-top")
             .css({
@@ -103,13 +108,14 @@ $(function(){
             $(window).scrollTop(1);
             $(window).scrollTop(0);
 
-            if(!isMobileLayout && ($headerLeft.height() < 80)){
-                $right.children(".page-wrapper").removeClass("affix").addClass("affix-top");
+            if($headerLeft.height() < 80){
+                $right.children(".page-wrapper").removeClass("affix").addClass("affix-top").attr("style", "");
                 $headerRight
                     .css("position", "static")
                     .affix();
                 $headerRight.attr("style", "");
-                $headerRight.data("bs.affix").enable();
+                if($headerRight.data("bs.affix"))
+                    $headerRight.data("bs.affix").enable();
             }
 
             $left.css({
@@ -125,7 +131,14 @@ $(function(){
                 overflowX: "auto"
             });
             $left.unwrap();
+            $(window).scrollTop(1);
+            $(window).scrollTop(0);
         });
+
+        setTimeout(function(){
+            $(window).scrollTop(1);
+            $(window).scrollTop(0);
+        }, 10);
 
         $headerLeft.data("bs.affix").disable();
         $headerLeft[animate]({
@@ -137,10 +150,15 @@ $(function(){
     }
 
     function slideLeft(){
+        var html = $(".pjax-container").html();
+        if(html){
+            $left.html(html);
+            $(".pjax-container").html("");
+        }
         $header = $(".header-wrapper");
         $headerLeft = $(".wrapper-left .header-wrapper");
         $headerRight = $(".wrapper-right .header-wrapper");
-        var isMobileLayout = $left.css("padding-left") != "0px";
+        var isMobileLayout = $(window).width() < 768;
         $('[data-spy="affix"]').each(function(){
             if(isMobileLayout){
                 if($(this).data("bs.affix")){
@@ -178,7 +196,7 @@ $(function(){
             width: "200%"
         });
 
-        if(!isMobileLayout && ($headerRight.height() > 80)){
+        if($headerRight.height() > 80){
             $right.children(".page-wrapper").addClass("no-affix");
         }
 
@@ -218,59 +236,71 @@ $(function(){
     window.slideRight = slideRight;
     window.slideLeft = slideLeft;
 
-    if($.support.pjax){
-        $.pjax.defaults.timeout = 100000;
-        $.pjax.defaults.scrollTo = null;
+    if(1||$.support.pjax){
+        // $.pjax.defaults.timeout = 100000;
+        // $.pjax.defaults.scrollTo = null;
         origin = location.protocol + "//" + location.host;
         // add pjax to links pinting to sub-pages
-        $left.on("click", "a[href^='" + location.pathname + "'], a[href^='" + origin + location.pathname + "']", function(event){
-            $.pjax.click(event, {container: $right.selector, fragment: $left.selector});
+        // $left.on("click", "a[href^='" + location.pathname + "'], a[href^='" + origin + location.pathname + "']", function(event){
+        $left.on("click", "a", function(event){
+            // $.pjax.click(event, {container: ".pjax-container", fragment: $left.selector});
+            History.pushState({nextSlide: "right"}, "", $(this).attr("href"));
             nextSlide = "right";
+            event.preventDefault();
+            event.stopPropagation();
             return false;
         });
         // add pjax to links pinting to the parent page
-        // $right.on("click", "a[href='" + origin + location.pathname.split("/").slice(0,-2).join("/") + "/" + "']", function(){
-        $right.on("click", "a", function(){
+        // $right.on("click", "a[href='" + origin + location.pathname.split("/").slice(0,-2).join("/") + "/" + "']", function(event){
+        $right.on("click", "a", function(event){
             leftStyle = $left.attr("style");
             nextSlide = "left";
-            $.pjax.click(event, {container: $left.selector, fragment: $left.selector});
+            // $.pjax.click(event, {container: ".pjax-container", fragment: $left.selector});
+            History.pushState({nextSlide: "left"}, "", $(this).attr("href"));
+            event.preventDefault();
+            event.stopPropagation();
             return false;
         });
 
-        $(window).on('popstate.pjax', function(event) {
-            var st = event.state;
-            // .container;
-            // debugger
-        });
+        History.Adapter.bind(window,'statechange', function(event) {
+            var st = History.getState();  // Note: We are using History.getState() instead of event.state
+            var nextSlide = st.nextSlide;
+            $.ajax({
+                url: st.url,
+                success: function(response){
+                    var $content = $("<div/>");
+                    $content.append(response);
+                    $content.find("script").remove();
+                    $(".pjax-container").html($content.find(".wrapper-left").children());
+                    if(nextSlide && window.leftStyle){
+                        $left.attr("style", leftStyle);
+                    }
 
-        $(document).on('pjax:end', function(event) {
-            // $('#loading').hide()
-            if(nextSlide && window.leftStyle){
-                $left.attr("style", leftStyle);
-            }
+                    $('[data-spy="affix"]').each(function () {
+                        var $this = $(this);
+                        var data = $this.data();
+                        data.offset = data.offset || {};
+                        if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
+                        if (data.offsetTop)    data.offset.top    = data.offsetTop;
+                        $this.affix(data);
+                    });
 
-            $('[data-spy="affix"]').each(function () {
-                var $this = $(this);
-                var data = $this.data();
-                data.offset = data.offset || {};
-                if (data.offsetBottom) data.offset.bottom = data.offsetBottom;
-                if (data.offsetTop)    data.offset.top    = data.offsetTop;
-                $this.affix(data);
-            });
-
-            if(nextSlide == "right"){
-                slideRight();
-                nextSlide = null;
-            }else if(nextSlide == "left"){
-                slideLeft();
-                nextSlide = null;
-            }else{
-                if(pixelToNumber($(".wrapper-left").css("left")) < 0){
-                    slideLeft();
-                }else{
-                    slideRight();
+                    if(nextSlide == "right"){
+                        slideRight();
+                        nextSlide = null;
+                    }else if(nextSlide == "left"){
+                        slideLeft();
+                        nextSlide = null;
+                    }else{
+                        if(pixelToNumber($(".wrapper-left").css("left")) < 0){
+                            slideLeft();
+                        }else{
+                            slideRight();
+                        }
+                    }
                 }
-            }
+            });
+            return false;
         });
     }
 });
