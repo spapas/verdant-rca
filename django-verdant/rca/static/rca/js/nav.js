@@ -1,22 +1,12 @@
 $(function(){
 
-	$(".mobile-menu-button").click(function(){
-		if($(".mobile-menu-wrapper").width() === 0){
-			$(".mobile-content-wrapper").width($(".mobile-content-wrapper").width() + "px");
-			$("body")
-				.css({
-					"width": "150%",
-					"overflow-x": "hidden"
-				})
-				.addClass("show-mobile-menu");
-		}else{
-			$("body").removeClass("show-mobile-menu");
-			setTimeout(function(){
-				$("body, .mobile-content-wrapper").removeAttr("style");
-			}, 1100);
-		}
-		return false;
+	/* configure left slideout menu toggle */
+	$(".mobile-menu-button").toggleClick(function(){
+		$("body").addClass("show-mobile-menu");
+	},function(){
+		$("body").removeClass("show-mobile-menu");
 	});
+
 
 	// copy the sidebar so that we can show it on the left in the mobile version
 	if(!$(".mobile-menu-wrapper > aside").length){
@@ -59,15 +49,27 @@ $(function(){
 	});
 
 	/* IE<9 targetted execution of above desktopSmall Harvey stuff, since media queries aren't understood */
-	$('.lt-ie9').each(function(){
-		desktopNav.apply()
-	})
+    $('.lt-ie9').each(function(){
+        desktopNav.apply()
+    })
 
 });
 
 var desktopNav = {
 	apply: function(){
-		$(".menu a[href$='" + document.location.pathname + "']").parents("li").addClass("selected");
+		// highlight the path to the current page in the menu based on the url
+		// it might not contain all the levels leading to it
+		var path = document.location.pathname;
+		while(path.split("/").length > 2){
+			var $menuItem = $(".menu a[href$='" + path + "']");
+			if($menuItem.length){
+				$menuItem.parents("li").addClass("selected");
+				break;
+			}else{
+				path = path.split("/").slice(0, -2).join("/") + "/";
+			}
+		}
+
 		$('.nav-wrapper nav:not(.dl-menuwrapper)').each(function(){
 			var $self = $(this);
 			var maxHeight = 0;
