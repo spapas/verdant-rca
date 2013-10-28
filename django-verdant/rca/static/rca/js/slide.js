@@ -61,7 +61,8 @@ $(function(){
 
         $left.css({
             width: $("body").width(),
-            float: "left"
+            float: "left",
+            marginTop: (-scrollY) + "px"
         });
         $right.css({
             position: "static",
@@ -179,7 +180,8 @@ $(function(){
         $left.css({
             width: $("body").width(),
             float: "left",
-            position: "static"
+            position: "static",
+            marginTop: 0
         });
         $right.css({
             width: $("body").width(),
